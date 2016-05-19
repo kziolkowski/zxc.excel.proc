@@ -58,6 +58,7 @@ namespace zxc.excel
 
 		public int ID_SEKCJI;
 		public int NR_KOLEJNY;
+  public string SPOS_FORMAT;
 
 		public Dictionary<int, rec_PRT> PRT;
 		public rec_TWT() { PRT = new Dictionary<int, rec_PRT>(); }
@@ -73,8 +74,8 @@ namespace zxc.excel
 			StringBuilder sb = new StringBuilder();
 			sb.Append("\nINSERT INTO SL.SOS_S_TEKST_PISMA\n(TWT_ID_TEKST_PISMA,TWT_ID_TYP_PISMA,TWT_ID_TEKST,TWT_ID_SEKCJI,\nTWT_NR_KOL_TEKSTU,");
 			sb.Append("TWT_CZY_DOMYSLNY,TWT_SPOS_FORMAT,\nTWT_DATA_OD,TWT_DATA_DO)\n");
-			sb.AppendFormat("VALUES ({0},{1},{2},{3},{4},'T','K','2016-01-01','9999-09-09'); ", //-- {5}\n", 
-				ID_TEKST_PISMA, ID_TYP_PISMA, ID_TEKST, ID_SEKCJI, NR_KOLEJNY); //, kod_pisma);
+			sb.AppendFormat("VALUES ({0},{1},{2},{3},{4},'T','{5}','2016-01-01','9999-09-09'); ", //-- {5}\n", 
+				ID_TEKST_PISMA, ID_TYP_PISMA, ID_TEKST, ID_SEKCJI, NR_KOLEJNY, SPOS_FORMAT); //, kod_pisma);
 
 			foreach(KeyValuePair<int, rec_PRT> prt in PRT)
 			{

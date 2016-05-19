@@ -35,26 +35,26 @@ namespace zxc.excel
 			exWks = exWbk.Sheets[sheet];
 
 			dParamID = new Dictionary<string, int>();
-			dParamID.Add("L", 1);
-			dParamID.Add("M", 8);
-			dParamID.Add("N", 44);
-			dParamID.Add("O", 45);
-			dParamID.Add("P", 72);
-			dParamID.Add("Q", 75);
-			dParamID.Add("R", 242);
-			dParamID.Add("S", 245);
-			dParamID.Add("T", 289);
-			dParamID.Add("U", 304);
-			dParamID.Add("V", 305);
-			dParamID.Add("W", 306);
-			dParamID.Add("X", 307);
-			dParamID.Add("Y", 308);
-			dParamID.Add("Z", 309);
-			dParamID.Add("AA", 320);
-			dParamID.Add("AB", 321);
-			dParamID.Add("AC", 322);
-			dParamID.Add("AD", 323);
-		}
+            dParamID.Add("M", 1);   // ("L", 1);
+            dParamID.Add("N", 8);   // ("M", 8);
+            dParamID.Add("O", 44);  // ("N", 44);
+            dParamID.Add("P", 45);  // ("O", 45);
+            dParamID.Add("Q", 72);  // ("P", 72);
+            dParamID.Add("R", 75);  // ("Q", 75);
+            dParamID.Add("S", 242); // ("R", 242);
+            dParamID.Add("T", 245); // ("S", 245);
+            dParamID.Add("U", 289); // ("T", 289);
+            dParamID.Add("V", 304); // ("U", 324); 304 -> 324
+            dParamID.Add("W", 305); // ("V", 325); 305 -> 325
+            dParamID.Add("X", 306); // ("W", 326); 306 -> 326
+            dParamID.Add("Y", 307); // ("X", 327); 307 -> 327
+            dParamID.Add("Z", 308); // ("Y", 328); 308 -> 328
+            dParamID.Add("AA", 309); // ("Z", 329); 309 -> 329
+            dParamID.Add("AB", 320); // ("AA", 320); 300 -> 320 zrobione wczesniej (nie wymaga zmiany)
+            dParamID.Add("AC", 321); // ("AB", 321); 301 -> 321 j.w.
+            dParamID.Add("AD", 322); // ("AC", 322); 302 -> 322 j.w.
+            dParamID.Add("AE", 323); // ("AD", 323); 303 -> 323 j.w.
+        }
 
 		~Reader()
 		{
@@ -71,8 +71,8 @@ namespace zxc.excel
 
 		public string Cell(string col, string row)
 		{
-			//return exWks.Range[ col + row ].Text;
-			return exWks.Range[ col + row ].
+            //return exWks.Range[ col + row ].Text;
+            return exWks.Range[col + row].Text;
 		}
 
 		protected int ParseInt(string val)
@@ -106,6 +106,7 @@ namespace zxc.excel
 			twt.kod_pisma      = Cell("H", str_row);
 			twt.ID_TYP_PISMA   = int.Parse(Cell("I", str_row));
 			twt.NR_KOLEJNY     = ParseInt(Cell("J", str_row));
+   twt.SPOS_FORMAT    = Cell("K", str_row); // dla dodanej kolumny "K"
 			twt.ID_TEKST_PISMA = ID++;
 
 			Console.Write(" ={0}", twt.kod_pisma);
