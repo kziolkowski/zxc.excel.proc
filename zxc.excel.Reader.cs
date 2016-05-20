@@ -48,7 +48,7 @@ namespace zxc.excel
             dParamID.Add("W", 305); // ("V", 325); 305 -> 325
             dParamID.Add("X", 306); // ("W", 326); 306 -> 326
             dParamID.Add("Y", 307); // ("X", 327); 307 -> 327
-            dParamID.Add("Z", 308); // ("Y", 328); 308 -> 328
+            dParamID.Add("Z", 308);  // ("Y", 328); 308 -> 328
             dParamID.Add("AA", 309); // ("Z", 329); 309 -> 329
             dParamID.Add("AB", 320); // ("AA", 320); 300 -> 320 zrobione wczesniej (nie wymaga zmiany)
             dParamID.Add("AC", 321); // ("AB", 321); 301 -> 321 j.w.
@@ -137,6 +137,10 @@ namespace zxc.excel
 				//stw.STW_TEKST     = Cell("F", str_row);
 
 				string key  = Cell("D", str_row);
+				string name = Cell("E", str_row);
+					int len = name.Length;
+		                len = len > 149 ? 149 : len;
+					name = name.Substring(0, len);
 				string text = Cell("F", str_row);
 				Console.Write("\n#{0}:{1}:{2}", key, row, twt_id);
 
@@ -158,7 +162,7 @@ namespace zxc.excel
 				{
 					stw = new rec_STW();
 					stw.STW_ID_TEKST = baseSTW + counter++;
-					stw.STW_NAZWA    = key;
+					stw.STW_NAZWA    = name;
 					stw.STW_TEKST    = text;
 					rec_TWT twt = ReadTWT(ref twt_id, stw.STW_ID_TEKST, str_row);
 					stw.TWT.Add(twt.ID_TEKST_PISMA, twt);

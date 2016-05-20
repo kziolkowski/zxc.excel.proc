@@ -58,12 +58,12 @@ namespace zxc.excel
 		public string to_update_string()
 		{
 			StringBuilder sb = new StringBuilder();
-			sb.AppendFormat("\nupdate {0}.{1} set ", prefix, table);
-			sb.AppendFormat("  PRT_RODZAJ={0},PRT_ID_SEKCJI={1},\n", RODZAJ, ID_SEKCJI);
-			sb.AppendFormat("  PRT_WARTOSC={0},PRT_WIELE_PARAM={1} \n", WARTOSC, WIELE_PARAM);
-			sb.AppendFormat("where PRT_ID_TYP_PISMA = {0} and \n", ID_TYP_PISMA);
-			sb.AppendFormat("  PRT_ID_TEKST_PISMA = {0} and \n", ID_TEKST_PISMA);
-			sb.AppendFormat("  PRT_ID_PARAMETRU = {0}", ID_PARAMETRU);
+			sb.AppendFormat("\n  update {0}.{1} set\n", prefix, table);
+			sb.AppendFormat("  PRT_RODZAJ='{0}',PRT_ID_SEKCJI={1},PRT_WIELE_PARAM='{2}',\n", RODZAJ, ID_SEKCJI, WIELE_PARAM);
+			sb.AppendFormat("  PRT_WARTOSC='{0}' \n", WARTOSC);
+			sb.AppendFormat("  where PRT_ID_TYP_PISMA  ={0} and \n", ID_TYP_PISMA);
+			sb.AppendFormat("        PRT_ID_TEKST_PISMA={0} and \n", ID_TEKST_PISMA);
+			sb.AppendFormat("        PRT_ID_PARAMETRU  ={0};", ID_PARAMETRU);
 
 			return sb.ToString();
 		}
@@ -119,11 +119,11 @@ namespace zxc.excel
 		public string to_update_string()
 		{
 			StringBuilder sb = new StringBuilder();
-			sb.AppendFormat("\nUPDATE {0}.{1} SET \n", prefix, table);
-			sb.AppendFormat("TWT_ID_SEKCJI={0},TWT_NR_KOL_TEKSTU={1},", ID_SEKCJI, NR_KOLEJNY);
-			sb.AppendFormat("TWT_SPOS_FORMAT={0} ", SPOS_FORMAT);
-			sb.AppendFormat("WHERE TWT_ID_TEKST_PISMA={0} AND ", ID_TEKST_PISMA );
-			sb.AppendFormat(" AND TWT_ID_TYP_PISMA={0} AND TWT_ID_TEKST={1};", ID_TYP_PISMA, ID_TEKST);
+			sb.AppendFormat("\n UPDATE {0}.{1} SET \n", prefix, table);
+			sb.AppendFormat(" TWT_ID_SEKCJI={0},TWT_NR_KOL_TEKSTU={1},", ID_SEKCJI, NR_KOLEJNY);
+			sb.AppendFormat("TWT_SPOS_FORMAT='{0}' ", SPOS_FORMAT);
+			sb.AppendFormat("\n WHERE TWT_ID_TEKST_PISMA={0} AND\n", ID_TEKST_PISMA );
+			sb.AppendFormat("    TWT_ID_TYP_PISMA={0} AND TWT_ID_TEKST={1};", ID_TYP_PISMA, ID_TEKST);
 
 			foreach(KeyValuePair<int, rec_PRT> prt in PRT)
 			{
@@ -200,7 +200,7 @@ namespace zxc.excel
 			StringBuilder sb = new StringBuilder();
 			sb.AppendFormat("\n\nINSERT INTO {0}.{1} \n", prefix, table);
 			sb.Append("(STW_ID_TEKST,STW_NAZWA,STW_TEKST,STW_ID_JEDN_ZUS,STW_ID_ZNACZNIKA)\n");
-			sb.AppendFormat("VALUES ({0},\n{1}\n,\n{2}\n,NULL,NULL);", 
+			sb.AppendFormat("VALUES ({0},\n{1},\n{2},\nNULL,NULL);", 
 				STW_ID_TEKST, 
 				LimitWidthConvert( STW_NAZWA, 60, "concat"), 
 				LimitWidthConvert( NewLineConvert(STW_TEKST), 60, "concat")
@@ -215,14 +215,14 @@ namespace zxc.excel
 		public string to_update_string()
 		{
 			StringBuilder sb = new StringBuilder();
-			sb.Append("\nUPDATE SL.SOS_S_TEKSTOW SET\n");
-			sb.AppendFormat("STW_NAZWA={0},\nSTW_TEKST={1},\n", 
-				LimitWidthConvert( STW_NAZWA, 60, "||"), 
-				LimitWidthConvert( NewLineConvert(STW_TEKST), 60, "||")
+			sb.Append("\nUPDATE SL.SOS_S_TEKSTOW SET");
+			sb.AppendFormat("\nSTW_NAZWA=\n{0},\nSTW_TEKST=\n{1} ", 
+				LimitWidthConvert( STW_NAZWA, 60, "concat"), 
+				LimitWidthConvert( NewLineConvert(STW_TEKST), 60, "concat")
 			);
 
-			sb.AppendFormat("STW_ID_JEDN_ZUS,STW_ID_ZNACZNIKA)\n");
-			sb.AppendFormat("WHERE STW_ID_TEKST={0};", STW_ID_TEKST); 
+			//sb.AppendFormat("STW_ID_JEDN_ZUS,STW_ID_ZNACZNIKA)\n");
+			sb.AppendFormat("\nWHERE STW_ID_TEKST={0};", STW_ID_TEKST); 
 
 			foreach(KeyValuePair<int, rec_TWT> twt in TWT)
 				sb.Append( twt.Value.to_update_string() );
