@@ -42,7 +42,7 @@ namespace zxc.excel.proc
 
 
 			System.IO.StreamWriter writer = new System.IO.StreamWriter(args[1]);
-			writer.Write(dicts.ToSqlString());
+			writer.Write(dicts.to_insert_string());
 			writer.Close();
 
 			Console.Write("Koniec, naciś entera ...");
