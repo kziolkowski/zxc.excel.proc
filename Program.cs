@@ -20,10 +20,11 @@ namespace zxc.excel.proc
 		static void Main(string[] args)
 		{
 			string mode = "insert";
+			Boolean bShowPrefix = true;
 
-			if(args.Count() < 4 || args.Count() > 5)
+			if(args.Count() < 4 || args.Count() > 6)
 			{
-				Console.WriteLine("\nUsage:\n\tzxc.excel.proc.EXE inputFilePath outputFilePath intBaseSTW intBaseTWT [insert|update]\n");
+				Console.WriteLine("\nUsage:\n\tzxc.excel.proc.EXE inputFilePath outputFilePath intBaseSTW intBaseTWT [insert|update] bShowPrefix [true|false]\n");
 				return;
 			}
 
@@ -38,6 +39,10 @@ namespace zxc.excel.proc
 					Console.WriteLine("Incorrect mode {0}", args[4]);
 					return;
 				}
+			if(args.Count() > 5 && args[5].ToLower() == "false")
+			{
+				bShowPrefix = false;
+			}
 			}
 
 			Console.WriteLine("input  file: {0}", args[0]);
@@ -45,9 +50,10 @@ namespace zxc.excel.proc
 			Console.WriteLine("base number for STW: {0}", int.Parse(args[2]));
 			Console.WriteLine("base number for TWT: {0}", int.Parse(args[3]));
 			Console.WriteLine("SQL Generation mode: {0}", mode);
+			Console.WriteLine("present prefix in SQL: {0}", bShowPrefix.ToString());
 
 			Reader rdr = new Reader(args[0], "toSOS_S_TEKSTOW");
-			Dicts dicts = new Dicts();
+			Dicts dicts = new Dicts(bShowPrefix);
 
 			int cnt = rdr.ReadSTW(dicts, int.Parse(args[2]), int.Parse(args[3]));
 

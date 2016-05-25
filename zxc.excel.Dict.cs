@@ -43,10 +43,13 @@ namespace zxc.excel
 				ID_PARAMETRU, ID_TYP_PISMA, ID_TEKST_PISMA, ID_SEKCJI, RODZAJ, WIELE_PARAM, WARTOSC);
 		}
 
-		public string to_insert_string()
+		public string to_insert_string(Boolean presentPrefix)
 		{
 			StringBuilder sb = new StringBuilder();
+		if(presentPrefix)
 			sb.AppendFormat("\ninsert into {0}.{1} ", prefix, table);
+		else
+			sb.AppendFormat("\ninsert into {0} ", table);
 			sb.Append("PRT_ID_TYP_PISMA,PRT_ID_TEKST_PISMA,\nPRT_ID_PARAMETRU,");
 			sb.Append("PRT_RODZAJ,PRT_ID_SEKCJI,PRT_PARAM_FILTR,\nPRT_WARTOSC,PRT_WIELE_PARAM) \nVALUES \n");
 			sb.AppendFormat("({0},{1},{2},'{3}',{4},NULL,'{5}','{6}');", ID_TYP_PISMA, ID_TEKST_PISMA, ID_PARAMETRU,
@@ -55,10 +58,13 @@ namespace zxc.excel
 			return sb.ToString();
 		}
 
-		public string to_update_string()
+		public string to_update_string(Boolean presentPrefix)
 		{
 			StringBuilder sb = new StringBuilder();
+		if(presentPrefix)
 			sb.AppendFormat("\n  update {0}.{1} set\n", prefix, table);
+		else
+			sb.AppendFormat("\n  update {0} set\n", table);
 			sb.AppendFormat("  PRT_RODZAJ='{0}',PRT_ID_SEKCJI={1},PRT_WIELE_PARAM='{2}',\n", RODZAJ, ID_SEKCJI, WIELE_PARAM);
 			sb.AppendFormat("  PRT_WARTOSC='{0}' \n", WARTOSC);
 			sb.AppendFormat("  where PRT_ID_TYP_PISMA  ={0} and \n", ID_TYP_PISMA);
@@ -99,10 +105,14 @@ namespace zxc.excel
 			return String.Format("{ID[{0}]:ID_TEKST{1}:Typ:{2}({3}):Sek{4}}", ID_TEKST_PISMA, ID_TEKST, ID_TYP_PISMA, kod_pisma, ID_SEKCJI);
 		}
 
-		public string to_insert_string()
+		public string to_insert_string(Boolean presentPrefix)
 		{
 			StringBuilder sb = new StringBuilder();
+		if (presentPrefix)
 			sb.AppendFormat("\nINSERT INTO {0}.{1}", prefix, table);
+		else
+			sb.AppendFormat("\nINSERT INTO {0}", table);
+
 			sb.AppendFormat("\nTWT_ID_TEKST_PISMA,TWT_ID_TYP_PISMA,TWT_ID_TEKST,TWT_ID_SEKCJI,\nTWT_NR_KOL_TEKSTU,");
 			sb.Append("TWT_CZY_DOMYSLNY,TWT_SPOS_FORMAT,\nTWT_DATA_OD,TWT_DATA_DO)\n");
 			sb.AppendFormat("VALUES ({0},{1},{2},{3},{4},'T','{5}','2016-01-01','9999-09-09'); ", //-- {5}\n", 
@@ -110,24 +120,28 @@ namespace zxc.excel
 
 			foreach(KeyValuePair<int, rec_PRT> prt in PRT)
 			{
-				sb.Append( prt.Value.to_insert_string() );
+				sb.Append( prt.Value.to_insert_string(presentPrefix) );
 			}
 			
 			return sb.ToString();
 		}
 
-		public string to_update_string()
+		public string to_update_string(Boolean presentPrefix)
 		{
 			StringBuilder sb = new StringBuilder();
+		if (presentPrefix)
 			sb.AppendFormat("\n UPDATE {0}.{1} SET \n", prefix, table);
+		else
+			sb.AppendFormat("\n UPDATE {0} SET \n", table);
 			sb.AppendFormat(" TWT_ID_SEKCJI={0},TWT_NR_KOL_TEKSTU={1},", ID_SEKCJI, NR_KOLEJNY);
 			sb.AppendFormat("TWT_SPOS_FORMAT='{0}' ", SPOS_FORMAT);
+			sb.AppendFormat("TWT_CZY_DOMYSLNY='{0}'", 'N');
 			sb.AppendFormat("\n WHERE TWT_ID_TEKST_PISMA={0} AND\n", ID_TEKST_PISMA );
 			sb.AppendFormat("    TWT_ID_TYP_PISMA={0} AND TWT_ID_TEKST={1};", ID_TYP_PISMA, ID_TEKST);
 
 			foreach(KeyValuePair<int, rec_PRT> prt in PRT)
 			{
-				sb.Append( prt.Value.to_update_string() );
+				sb.Append( prt.Value.to_update_string(presentPrefix) );
 			}
 			
 			return sb.ToString();
@@ -195,11 +209,14 @@ namespace zxc.excel
 			return "{" + STW_ID_TEKST + ":" + STW_NAZWA + ":" + STW_TEKST + "}";
 		}
 
-		public string to_insert_string()
+		public string to_insert_string(Boolean presentPrefix)
 		{
 			StringBuilder sb = new StringBuilder();
+		if (presentPrefix)
 			sb.AppendFormat("\n\nINSERT INTO {0}.{1} \n", prefix, table);
-			sb.Append("(STW_ID_TEKST,STW_NAZWA,STW_TEKST,STW_ID_JEDN_ZUS,STW_ID_ZNACZNIKA)\n");
+		else
+			sb.AppendFormat("\n\nINSERT INTO {0} \n", table);
+				sb.Append("(STW_ID_TEKST,STW_NAZWA,STW_TEKST,STW_ID_JEDN_ZUS,STW_ID_ZNACZNIKA)\n");
 			sb.AppendFormat("VALUES ({0},\n{1},\n{2},\nNULL,NULL);", 
 				STW_ID_TEKST, 
 				LimitWidthConvert( STW_NAZWA, 60, "concat"), 
@@ -207,15 +224,19 @@ namespace zxc.excel
 			);
 
 			foreach(KeyValuePair<int, rec_TWT> twt in TWT)
-				sb.Append( twt.Value.to_insert_string() );
+				sb.Append( twt.Value.to_insert_string(presentPrefix) );
 			
 			return sb.ToString();
 		}
 
-		public string to_update_string()
+		public string to_update_string(Boolean presentPrefix)
 		{
 			StringBuilder sb = new StringBuilder();
+		if(presentPrefix)
 			sb.Append("\nUPDATE SL.SOS_S_TEKSTOW SET");
+		else
+			sb.Append("\nUPDATE SOS_S_TEKSTOW SET");
+
 			sb.AppendFormat("\nSTW_NAZWA=\n{0},\nSTW_TEKST=\n{1} ", 
 				LimitWidthConvert( STW_NAZWA, 60, "concat"), 
 				LimitWidthConvert( NewLineConvert(STW_TEKST), 60, "concat")
@@ -225,7 +246,7 @@ namespace zxc.excel
 			sb.AppendFormat("\nWHERE STW_ID_TEKST={0};", STW_ID_TEKST); 
 
 			foreach(KeyValuePair<int, rec_TWT> twt in TWT)
-				sb.Append( twt.Value.to_update_string() );
+				sb.Append( twt.Value.to_update_string(presentPrefix) );
 			
 			return sb.ToString();
 		}
@@ -238,10 +259,13 @@ namespace zxc.excel
 	class Dicts
 	{
 		public Dictionary<string, rec_STW> STW;
+		private Boolean bshowPrefix;
 
-		public Dicts()
+		public Dicts(Boolean showPrefix)
 		{
 			STW = new Dictionary<string, rec_STW>();
+		bshowPrefix = showPrefix;
+
 		}
 
 		public override string ToString()
@@ -260,7 +284,7 @@ namespace zxc.excel
 			StringBuilder sb = new StringBuilder();
 			foreach(KeyValuePair<string, rec_STW> rec in STW)
 			{
-				sb.Append( rec.Value.to_insert_string() );
+				sb.Append( rec.Value.to_insert_string(bshowPrefix) );
 			}
 			return sb.ToString();
 		}
@@ -270,7 +294,7 @@ namespace zxc.excel
 			StringBuilder sb = new StringBuilder();
 			foreach(KeyValuePair<string, rec_STW> rec in STW)
 			{
-				sb.Append( rec.Value.to_update_string() );
+				sb.Append( rec.Value.to_update_string(bshowPrefix) );
 			}
 			return sb.ToString();
 		}
