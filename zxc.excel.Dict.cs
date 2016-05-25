@@ -133,9 +133,9 @@ namespace zxc.excel
 			sb.AppendFormat("\n UPDATE {0}.{1} SET \n", prefix, table);
 		else
 			sb.AppendFormat("\n UPDATE {0} SET \n", table);
-			sb.AppendFormat(" TWT_ID_SEKCJI={0},TWT_NR_KOL_TEKSTU={1},", ID_SEKCJI, NR_KOLEJNY);
-			sb.AppendFormat("TWT_SPOS_FORMAT='{0}' ", SPOS_FORMAT);
-			sb.AppendFormat("TWT_CZY_DOMYSLNY='{0}'", 'N');
+			sb.AppendFormat(" TWT_ID_SEKCJI={0}, TWT_NR_KOL_TEKSTU={1}, ", ID_SEKCJI, NR_KOLEJNY);
+			sb.AppendFormat("TWT_SPOS_FORMAT='{0}' , ", SPOS_FORMAT);
+			sb.AppendFormat("TWT_CZY_DOMYSLNY='{0}' ", 'N');
 			sb.AppendFormat("\n WHERE TWT_ID_TEKST_PISMA={0} AND\n", ID_TEKST_PISMA );
 			sb.AppendFormat("    TWT_ID_TYP_PISMA={0} AND TWT_ID_TEKST={1};", ID_TYP_PISMA, ID_TEKST);
 
@@ -156,6 +156,8 @@ namespace zxc.excel
 	{
 		static string prefix = "SL";
 		static string table  = "SOS_S_TEKSTOW";
+		static string concatString = "||";       //uwaga MJ zamiana "concat" na "||" (double pipe)
+    static String newLine = "|| CHR(13) || CHR(10) ||";
 
 		public int    STW_ID_TEKST; //PK
 		public string STW_NAZWA;
@@ -174,7 +176,7 @@ namespace zxc.excel
 			for(int i=0; i<s.Length; i++)
 			{
 				if(s[i] == '\n')
-					sb.Append("/n");
+					sb.Append(newLine);
 				else
 					sb.Append(s[i]);
 			}
@@ -219,8 +221,8 @@ namespace zxc.excel
 				sb.Append("(STW_ID_TEKST,STW_NAZWA,STW_TEKST,STW_ID_JEDN_ZUS,STW_ID_ZNACZNIKA)\n");
 			sb.AppendFormat("VALUES ({0},\n{1},\n{2},\nNULL,NULL);", 
 				STW_ID_TEKST, 
-				LimitWidthConvert( STW_NAZWA, 60, "concat"), 
-				LimitWidthConvert( NewLineConvert(STW_TEKST), 60, "concat")
+				LimitWidthConvert( STW_NAZWA, 60, concatString), 
+				LimitWidthConvert( NewLineConvert(STW_TEKST), 60, concatString)
 			);
 
 			foreach(KeyValuePair<int, rec_TWT> twt in TWT)
@@ -237,9 +239,10 @@ namespace zxc.excel
 		else
 			sb.Append("\nUPDATE SOS_S_TEKSTOW SET");
 
-			sb.AppendFormat("\nSTW_NAZWA=\n{0},\nSTW_TEKST=\n{1} ", 
-				LimitWidthConvert( STW_NAZWA, 60, "concat"), 
-				LimitWidthConvert( NewLineConvert(STW_TEKST), 60, "concat")
+			sb.AppendFormat(" \nSTW_NAZWA=\n{0},\nSTW_TEKST=\n{1} ", 
+				LimitWidthConvert( STW_NAZWA, 60, concatString)
+				, 
+				LimitWidthConvert( NewLineConvert(STW_TEKST), 60, concatString)
 			);
 
 			//sb.AppendFormat("STW_ID_JEDN_ZUS,STW_ID_ZNACZNIKA)\n");

@@ -162,7 +162,7 @@ namespace zxc.excel
 				{
 					stw = new rec_STW();
 					stw.STW_ID_TEKST = baseSTW + counter++;
-					stw.STW_NAZWA    = name;
+					stw.STW_NAZWA    = Cell("D", str_row);// org name;
 					stw.STW_TEKST    = text;
 					rec_TWT twt = ReadTWT(ref twt_id, stw.STW_ID_TEKST, str_row);
 					stw.TWT.Add(twt.ID_TEKST_PISMA, twt);
