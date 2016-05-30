@@ -157,7 +157,7 @@ namespace zxc.excel
 		static string prefix = "SL";
 		static string table  = "SOS_S_TEKSTOW";
 		static string concatString = "||";       //uwaga MJ zamiana "concat" na "||" (double pipe)
-    static String newLine = "|| CHR(13) || CHR(10) ||";
+    static String newLine = "'|| CHR(13) || CHR(10) ||'";
 
 		public int    STW_ID_TEKST; //PK
 		public string STW_NAZWA;
