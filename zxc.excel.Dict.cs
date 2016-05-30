@@ -41,7 +41,6 @@ namespace zxc.excel
 		public string WIELE_PARAM;
 		public string WARTOSC;
 
-
 		public rec_PRT()
 		{
 			prefix = "ph";
@@ -66,10 +65,10 @@ namespace zxc.excel
 		public string to_insert_string(Boolean presentPrefix)
 		{
 			StringBuilder sb = new StringBuilder();
-			sb.AppendFormat("\ninsert into {0} ", table_name(presentPrefix) );
-			sb.Append("PRT_ID_TYP_PISMA,PRT_ID_TEKST_PISMA,\nPRT_ID_PARAMETRU,");
-			sb.Append("PRT_RODZAJ,PRT_ID_SEKCJI,PRT_PARAM_FILTR,\nPRT_WARTOSC,PRT_WIELE_PARAM) \nVALUES \n");
-			sb.AppendFormat("({0},{1},{2},'{3}',{4},NULL,'{5}','{6}');", ID_TYP_PISMA, ID_TEKST_PISMA, ID_PARAMETRU,
+			sb.AppendFormat("\n    insert into {0} ", table_name(presentPrefix) );
+			sb.Append("(PRT_ID_TYP_PISMA,PRT_ID_TEKST_PISMA,\n    PRT_ID_PARAMETRU,");
+			sb.Append("PRT_RODZAJ,PRT_ID_SEKCJI,PRT_PARAM_FILTR,\n    PRT_WARTOSC,PRT_WIELE_PARAM) \n    VALUES \n");
+			sb.AppendFormat("    ({0},{1},{2},'{3}',{4},NULL,'{5}','{6}');", ID_TYP_PISMA, ID_TEKST_PISMA, ID_PARAMETRU,
 						RODZAJ, ID_SEKCJI, WARTOSC, WIELE_PARAM );
 
 			return sb.ToString();
@@ -128,11 +127,12 @@ namespace zxc.excel
 		public string to_insert_string(Boolean presentPrefix)
 		{
 			StringBuilder sb = new StringBuilder();
-			sb.AppendFormat("\nINSERT INTO {0}", table_name(presentPrefix) );
+			sb.AppendFormat("\n  INSERT INTO {0}", table_name(presentPrefix) );
 
-			sb.AppendFormat("\nTWT_ID_TEKST_PISMA,TWT_ID_TYP_PISMA,TWT_ID_TEKST,TWT_ID_SEKCJI,\nTWT_NR_KOL_TEKSTU,");
-			sb.Append("TWT_CZY_DOMYSLNY,TWT_SPOS_FORMAT,\nTWT_DATA_OD,TWT_DATA_DO)\n");
-			sb.AppendFormat("VALUES ({0},{1},{2},{3},{4},'T','{5}','2016-01-01','9999-09-09'); ", //-- {5}\n", 
+			sb.AppendFormat("\n  (TWT_ID_TEKST_PISMA,TWT_ID_TYP_PISMA,TWT_ID_TEKST,TWT_ID_SEKCJI," );
+			sb.Append(      "\n  TWT_NR_KOL_TEKSTU,TWT_CZY_DOMYSLNY,TWT_SPOS_FORMAT,");
+			sb.Append(      "\n  TWT_DATA_OD,TWT_DATA_DO)\n");
+			sb.AppendFormat("  VALUES\n  ({0},{1},{2},{3},{4},'T','{5}','2016-01-01','9999-09-09'); ", //-- {5}\n", 
 				ID_TEKST_PISMA, ID_TYP_PISMA, ID_TEKST, ID_SEKCJI, NR_KOLEJNY, SPOS_FORMAT); //, kod_pisma);
 
 			foreach(KeyValuePair<int, rec_PRT> prt in PRT)
@@ -230,7 +230,7 @@ namespace zxc.excel
 					int newLinePos = substring.IndexOf('\n');
 					if(newLinePos == -1)
 					{
-						sb.AppendFormat("'{0}'{1}\n", substring, concat);
+						sb.AppendFormat("'{0}'\n", substring);
 						lineLen = width;
 					}
 					else
@@ -251,16 +251,14 @@ namespace zxc.excel
 
 		public string to_insert_string(Boolean presentPrefix)
 		{
+			int len = Math.Min(STW_NAZWA.Length, 148);
 			StringBuilder sb = new StringBuilder();
-		if (presentPrefix)
-			sb.AppendFormat("\n\nINSERT INTO {0}.{1} \n", prefix, table);
-		else
-			sb.AppendFormat("\n\nINSERT INTO {0} \n", table);
-				sb.Append("(STW_ID_TEKST,STW_NAZWA,STW_TEKST,STW_ID_JEDN_ZUS,STW_ID_ZNACZNIKA)\n");
+			sb.AppendFormat("\n\nINSERT INTO {0} \n", table_name(presentPrefix) );
+			sb.Append("(STW_ID_TEKST,STW_NAZWA,STW_TEKST,STW_ID_JEDN_ZUS,STW_ID_ZNACZNIKA)\n");
 			sb.AppendFormat("VALUES ({0},\n{1},\n{2},\nNULL,NULL);", 
 				STW_ID_TEKST, 
-				LimitWidthConvert( STW_NAZWA, 60, concatString), 
-				LimitWidthConvert( NewLineConvert(STW_TEKST), 60, concatString)
+				LimitWidthConvert( STW_NAZWA.Substring(0, len), 65, concatString), 
+				LimitWidthConvert( NewLineConvert(STW_TEKST), 65, concatString)
 			);
 
 			foreach(KeyValuePair<int, rec_TWT> twt in TWT)
@@ -278,9 +276,8 @@ namespace zxc.excel
 			sb.Append("\nUPDATE SOS_S_TEKSTOW SET");
 
 			sb.AppendFormat(" \nSTW_NAZWA=\n{0},\nSTW_TEKST=\n{1} ", 
-				LimitWidthConvert( STW_NAZWA, 60, concatString)
-				, 
-				LimitWidthConvert( NewLineConvert(STW_TEKST), 60, concatString)
+				LimitWidthConvert( STW_NAZWA, 65, concatString), 
+				LimitWidthConvert( NewLineConvert(STW_TEKST), 65, concatString)
 			);
 
 			//sb.AppendFormat("STW_ID_JEDN_ZUS,STW_ID_ZNACZNIKA)\n");

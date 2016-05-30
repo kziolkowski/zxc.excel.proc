@@ -44,12 +44,12 @@ namespace zxc.excel
             dParamID.Add("S", 242); // ("R", 242);
             dParamID.Add("T", 245); // ("S", 245);
             dParamID.Add("U", 289); // ("T", 289);
-            dParamID.Add("V", 304); // ("U", 324); 304 -> 324
-            dParamID.Add("W", 305); // ("V", 325); 305 -> 325
-            dParamID.Add("X", 306); // ("W", 326); 306 -> 326
-            dParamID.Add("Y", 307); // ("X", 327); 307 -> 327
-            dParamID.Add("Z", 308);  // ("Y", 328); 308 -> 328
-            dParamID.Add("AA", 309); // ("Z", 329); 309 -> 329
+            dParamID.Add("V", 324); // ("U", 324); 304 -> 324
+            dParamID.Add("W", 325); // ("V", 325); 305 -> 325
+            dParamID.Add("X", 326); // ("W", 326); 306 -> 326
+            dParamID.Add("Y", 327); // ("X", 327); 307 -> 327
+            dParamID.Add("Z", 328);  // ("Y", 328); 308 -> 328
+            dParamID.Add("AA", 329); // ("Z", 329); 309 -> 329
             dParamID.Add("AB", 320); // ("AA", 320); 300 -> 320 zrobione wczesniej (nie wymaga zmiany)
             dParamID.Add("AC", 321); // ("AB", 321); 301 -> 321 j.w.
             dParamID.Add("AD", 322); // ("AC", 322); 302 -> 322 j.w.

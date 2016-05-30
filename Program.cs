@@ -64,7 +64,7 @@ namespace zxc.excel.proc
 			// kodowanie polskich znakow w skrypcie : Ansi Windows-1250 
 			System.IO.StreamWriter writer = new System.IO.StreamWriter( args[1], false, Encoding.GetEncoding(1250) );
 			if(mode == "insert")
-				writer.Write(dicts.to_insert_string());
+				writer.Write( dicts.to_insert_string() );
 			else if(mode == "update")
 				writer.Write( dicts.to_update_string() );
 			else
