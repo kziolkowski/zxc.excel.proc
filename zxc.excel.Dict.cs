@@ -7,13 +7,30 @@ using System.Threading.Tasks;
 
 namespace zxc.excel
 {
+	class sql_table_generator
+	{
+		public string prefix; // = "PREFIX";
+		public string table; //  = "TABLE";
+
+		public string table_name(bool usePrefix)
+		{
+			StringBuilder sb = new StringBuilder(64);
+			if(usePrefix && prefix.Count()>0 )
+				sb.AppendFormat("{0}.{1} ", prefix, table);
+			else
+				sb.AppendFormat("{0}", table);
+
+			return sb.ToString();
+		}
+	}
+
 	/// <summary>
 	/// row from ph.s2_s_par_tekstu table
 	/// </summary>
-	class rec_PRT
+	class rec_PRT : sql_table_generator
 	{
-		static string prefix = "ph";
-		static string table  = "s2_s_par_tekstu";
+		//const string prefix = "ph";
+		//const string table  = "s2_s_par_tekstu";
 
 		public int    ID_PARAMETRU;
 		public int    ID_TYP_PISMA;
@@ -27,6 +44,9 @@ namespace zxc.excel
 
 		public rec_PRT()
 		{
+			prefix = "ph";
+			table  = "s2_s_par_tekstu";
+
 			ID_TYP_PISMA   = 0;	//pk
 			ID_TEKST_PISMA = 0;	//pk
 			ID_PARAMETRU   = 0;	//pk
@@ -46,10 +66,7 @@ namespace zxc.excel
 		public string to_insert_string(Boolean presentPrefix)
 		{
 			StringBuilder sb = new StringBuilder();
-		if(presentPrefix)
-			sb.AppendFormat("\ninsert into {0}.{1} ", prefix, table);
-		else
-			sb.AppendFormat("\ninsert into {0} ", table);
+			sb.AppendFormat("\ninsert into {0} ", table_name(presentPrefix) );
 			sb.Append("PRT_ID_TYP_PISMA,PRT_ID_TEKST_PISMA,\nPRT_ID_PARAMETRU,");
 			sb.Append("PRT_RODZAJ,PRT_ID_SEKCJI,PRT_PARAM_FILTR,\nPRT_WARTOSC,PRT_WIELE_PARAM) \nVALUES \n");
 			sb.AppendFormat("({0},{1},{2},'{3}',{4},NULL,'{5}','{6}');", ID_TYP_PISMA, ID_TEKST_PISMA, ID_PARAMETRU,
@@ -61,10 +78,7 @@ namespace zxc.excel
 		public string to_update_string(Boolean presentPrefix)
 		{
 			StringBuilder sb = new StringBuilder();
-		if(presentPrefix)
-			sb.AppendFormat("\n  update {0}.{1} set\n", prefix, table);
-		else
-			sb.AppendFormat("\n  update {0} set\n", table);
+			sb.AppendFormat("\n  update {0} set\n", table_name(presentPrefix) );
 			sb.AppendFormat("  PRT_RODZAJ='{0}',PRT_ID_SEKCJI={1},PRT_WIELE_PARAM='{2}',\n", RODZAJ, ID_SEKCJI, WIELE_PARAM);
 			sb.AppendFormat("  PRT_WARTOSC='{0}' \n", WARTOSC);
 			sb.AppendFormat("  where PRT_ID_TYP_PISMA  ={0} and \n", ID_TYP_PISMA);
@@ -79,10 +93,10 @@ namespace zxc.excel
 	/// <summary>
 	///  row from SL.SOS_S_TEKST_PISMA 
 	/// </summary>
-	class rec_TWT
+	class rec_TWT	: sql_table_generator
 	{
-		static string prefix = "SL";
-		static string table  = "SOS_S_TEKST_PISMA";
+		//static string prefix = "SL";
+		//static string table  = "SOS_S_TEKST_PISMA";
 
 		public int ID_TEKST_PISMA; //PK
 
@@ -97,8 +111,14 @@ namespace zxc.excel
 		public string SPOS_FORMAT;
 
 		public Dictionary<int, rec_PRT> PRT;
-		public rec_TWT() { PRT = new Dictionary<int, rec_PRT>(); }
 
+		public rec_TWT()
+		{
+			prefix = "SL";
+			table  = "SOS_S_TEKST_PISMA";
+
+			PRT = new Dictionary<int, rec_PRT>();
+		}
 
 		public override string ToString()
 		{
@@ -108,10 +128,7 @@ namespace zxc.excel
 		public string to_insert_string(Boolean presentPrefix)
 		{
 			StringBuilder sb = new StringBuilder();
-		if (presentPrefix)
-			sb.AppendFormat("\nINSERT INTO {0}.{1}", prefix, table);
-		else
-			sb.AppendFormat("\nINSERT INTO {0}", table);
+			sb.AppendFormat("\nINSERT INTO {0}", table_name(presentPrefix) );
 
 			sb.AppendFormat("\nTWT_ID_TEKST_PISMA,TWT_ID_TYP_PISMA,TWT_ID_TEKST,TWT_ID_SEKCJI,\nTWT_NR_KOL_TEKSTU,");
 			sb.Append("TWT_CZY_DOMYSLNY,TWT_SPOS_FORMAT,\nTWT_DATA_OD,TWT_DATA_DO)\n");
@@ -129,10 +146,7 @@ namespace zxc.excel
 		public string to_update_string(Boolean presentPrefix)
 		{
 			StringBuilder sb = new StringBuilder();
-		if (presentPrefix)
-			sb.AppendFormat("\n UPDATE {0}.{1} SET \n", prefix, table);
-		else
-			sb.AppendFormat("\n UPDATE {0} SET \n", table);
+			sb.AppendFormat("\n UPDATE {0} SET \n", table_name(presentPrefix) );
 			sb.AppendFormat(" TWT_ID_SEKCJI={0}, TWT_NR_KOL_TEKSTU={1}, ", ID_SEKCJI, NR_KOLEJNY);
 			sb.AppendFormat("TWT_SPOS_FORMAT='{0}' , ", SPOS_FORMAT);
 			sb.AppendFormat("TWT_CZY_DOMYSLNY='{0}' ", 'N');
@@ -152,12 +166,13 @@ namespace zxc.excel
 	/// <summary>
 	/// row from SL.SOS_S_TEKSTOW
 	/// </summary>
-	class rec_STW
+	class rec_STW : sql_table_generator
 	{
-		static string prefix = "SL";
-		static string table  = "SOS_S_TEKSTOW";
+//		static string prefix = "SL";
+//		static string table  = "SOS_S_TEKSTOW";
 		static string concatString = "||";       //uwaga MJ zamiana "concat" na "||" (double pipe)
-    static String newLine = "'|| CHR(13) || CHR(10) ||'";
+
+		static String newLine = "\nCHR(13)||CHR(10)\n";
 
 		public int    STW_ID_TEKST; //PK
 		public string STW_NAZWA;
@@ -167,6 +182,9 @@ namespace zxc.excel
 
 		public rec_STW()
 		{
+			prefix = "SL";
+			table  = "SOS_S_TEKSTOW";
+
 			TWT = new Dictionary<int, rec_TWT>();
 		}
 
@@ -186,24 +204,44 @@ namespace zxc.excel
 	
 		protected string LimitWidthConvert(string s, int width, string concat)
 		{ 
-			StringBuilder sb2 = new StringBuilder();
-			int len = s.Length;
-			for(int i=0; i<len; i+=width)
+			StringBuilder sb = new StringBuilder();
+			int len     = s.Length;
+			int lineLen = 0;
+			for(int i=0; i<len; i += lineLen)
 			{
 				if(i+width < len)
 				{
 					string substring = s.Substring(i, width);
-					sb2.AppendFormat("'{0}'{1}\n", substring, concat);
-					//sb2.AppendFormat("'{0}'concat\n", substring);
+					int newLinePos = substring.IndexOf('\n');
+					if(newLinePos == -1)
+					{
+						sb.AppendFormat("'{0}'{1}\n", substring, concat);
+						lineLen = width;
+					}
+					else
+					{
+						sb.AppendFormat("'{0}'{1}\n", substring.Substring(0, newLinePos), concat);
+						lineLen = newLinePos+1;
+					}
 				}
 				else
 				{
 					string substring = s.Substring(i, len-i);
-					sb2.AppendFormat("'{0}'", substring);
+					int newLinePos = substring.IndexOf('\n');
+					if(newLinePos == -1)
+					{
+						sb.AppendFormat("'{0}'{1}\n", substring, concat);
+						lineLen = width;
+					}
+					else
+					{
+						sb.AppendFormat("'{0}'{1}\n", substring.Substring(0, newLinePos), concat);
+						lineLen = newLinePos+1;
+					}
 				}
 			}
 
-			return sb2.ToString();
+			return sb.ToString();
 		}
 
 		public override string ToString()
@@ -267,7 +305,7 @@ namespace zxc.excel
 		public Dicts(Boolean showPrefix)
 		{
 			STW = new Dictionary<string, rec_STW>();
-		bshowPrefix = showPrefix;
+			bshowPrefix = showPrefix;
 
 		}
 
