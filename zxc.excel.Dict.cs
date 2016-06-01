@@ -172,7 +172,7 @@ namespace zxc.excel
 //		static string table  = "SOS_S_TEKSTOW";
 		static string concatString = "||";       //uwaga MJ zamiana "concat" na "||" (double pipe)
 
-		static String newLine = "\nCHR(13)||CHR(10)\n";
+		static String newLine = "\nCHR(13)||CHR(10)||\n";
 
 		public int    STW_ID_TEKST; //PK
 		public string STW_NAZWA;
@@ -204,6 +204,8 @@ namespace zxc.excel
 	
 		protected string LimitWidthConvert(string s, int width, string concat)
 		{ 
+			const string newLineSeq = "CHR(13)||CHR(10)||";
+
 			StringBuilder sb = new StringBuilder();
 			int len     = s.Length;
 			int lineLen = 0;
@@ -220,7 +222,11 @@ namespace zxc.excel
 					}
 					else
 					{
-						sb.AppendFormat("'{0}'{1}\n", substring.Substring(0, newLinePos), concat);
+						string subsub = substring.Substring(0, newLinePos);
+						if(subsub == newLineSeq)
+							sb.AppendFormat("{0}\n", subsub);
+						else
+							sb.AppendFormat("'{0}'{1}\n", subsub, concat);
 						lineLen = newLinePos+1;
 					}
 				}
@@ -235,7 +241,11 @@ namespace zxc.excel
 					}
 					else
 					{
-						sb.AppendFormat("'{0}'{1}\n", substring.Substring(0, newLinePos), concat);
+						string subsub = substring.Substring(0, newLinePos);
+						if(subsub == newLineSeq)
+							sb.AppendFormat("{0}\n", subsub);
+						else
+							sb.AppendFormat("'{0}'{1}\n", subsub, concat);
 						lineLen = newLinePos+1;
 					}
 				}
