@@ -263,7 +263,7 @@ namespace zxc.excel
 		{
 			int len = Math.Min(STW_NAZWA.Length, 148);
 			StringBuilder sb = new StringBuilder();
-			sb.AppendFormat("\n\nINSERT INTO {0} \n", table_name(presentPrefix) );
+			sb.AppendFormat("\nINSERT INTO {0} \n", table_name(presentPrefix) );
 			sb.Append("(STW_ID_TEKST,STW_NAZWA,STW_TEKST,STW_ID_JEDN_ZUS,STW_ID_ZNACZNIKA)\n");
 			sb.AppendFormat("VALUES ({0},\n{1},\n{2},\nNULL,NULL);", 
 				STW_ID_TEKST, 
