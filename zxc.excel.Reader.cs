@@ -61,6 +61,12 @@ namespace zxc.excel
 			exWbk.Close(false);
 		}
 
+		public int CreateParamDict()
+		{
+
+			return 0;
+		}
+
 		public string Header(string col)
 		{
 			string r = col + "1";
@@ -127,7 +133,7 @@ namespace zxc.excel
 		{
 			int counter = 0;
 			int twt_id = baseTWT;
-			for(int row=2; row<172; row++)
+			for(int row=2; row<174; row++)
 			{
 				string str_row = row.ToString();
 
