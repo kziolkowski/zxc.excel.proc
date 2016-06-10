@@ -67,7 +67,7 @@ namespace zxc.excel
 			StringBuilder sb = new StringBuilder();
 			sb.AppendFormat("\n    insert into {0} ", table_name(presentPrefix) );
 			sb.Append("(PRT_ID_TYP_PISMA,PRT_ID_TEKST_PISMA,\n    PRT_ID_PARAMETRU,");
-			sb.Append("PRT_RODZAJ,PRT_ID_SEKCJI,PRT_PARAM_FILTR,\n    PRT_WARTOSC,PRT_WIELE_PARAM) \n    VALUES \n");
+			sb.Append("PRT_RODZAJ,PRT_ID_SEKCJI,PRT_PARAM_FILTR,\n    PRT_WARTOSC,PRT_WIELE_PARAM) \n    values \n");
 			sb.AppendFormat("    ({0},{1},{2},'{3}',{4},NULL,'{5}','{6}');", ID_TYP_PISMA, ID_TEKST_PISMA, ID_PARAMETRU,
 						RODZAJ, ID_SEKCJI, WARTOSC, WIELE_PARAM );
 
