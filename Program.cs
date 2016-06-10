@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 
+
 namespace zxc.excel.proc
 {
 
@@ -61,16 +62,44 @@ namespace zxc.excel.proc
 
 			//Console.WriteLine("{0}", dicts.ToSqlString());
 
+			string outFile = System.IO.Path.GetFileNameWithoutExtension(args[1]);
+			string outExt  = System.IO.Path.GetExtension(args[1]);
+			string outDir  = System.IO.Path.GetDirectoryName(args[1]);
+			string outFile2 = System.IO.Path.Combine(outDir, outFile+"_pre"+outExt);
+			string delFile   = System.IO.Path.Combine(outDir, outFile+"_del"+outExt);
+			string delPreFile   = System.IO.Path.Combine(outDir, outFile+"_del_pre"+outExt);
+
 			// kodowanie polskich znakow w skrypcie : Ansi Windows-1250 
-			System.IO.StreamWriter writer = new System.IO.StreamWriter( args[1], false, Encoding.GetEncoding(1250) );
+			System.IO.StreamWriter writer_noPre   = new System.IO.StreamWriter( args[1],    false, Encoding.GetEncoding(1250) );
+			System.IO.StreamWriter writer_pre     = new System.IO.StreamWriter( outFile2,   false, Encoding.GetEncoding(1250) );
+			System.IO.StreamWriter writer_del     = new System.IO.StreamWriter( delFile,    false, Encoding.GetEncoding(1250) );
+			System.IO.StreamWriter writer_delPre  = new System.IO.StreamWriter( delPreFile, false, Encoding.GetEncoding(1250) );
+
 			if(mode == "insert")
-				writer.Write( dicts.to_insert_string() );
+			{
+				writer_noPre.Write( dicts.to_insert_string(false) );
+				writer_noPre.Close();
+
+				writer_del.Write( dicts.to_delete_string(false) );
+				writer_del.Close();
+
+				writer_pre.Write( dicts.to_insert_string(true) );
+				writer_pre.Close();
+
+ 				writer_delPre.Write( dicts.to_delete_string(true) );
+				writer_delPre.Close();
+
+			}
 			else if(mode == "update")
-				writer.Write( dicts.to_update_string() );
+			{
+				writer_noPre.Write( dicts.to_update_string(false) );
+				writer_noPre.Close();
+
+				writer_pre.Write(   dicts.to_update_string(true)  );
+				writer_pre.Close();
+			}
 			else
 				Console.WriteLine("Nieznany sql mode.");
-
-			writer.Close();
 
 			Console.Write("Koniec, naciś entera ...");
 			Console.ReadLine();

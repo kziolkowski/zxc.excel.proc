@@ -67,6 +67,18 @@ namespace zxc.excel
 			return 0;
 		}
 
+		public int RowCount(int nMax)
+		{
+			for(int i=2; i<nMax; i++)   // 2 pierwsze wiersze pomijamy
+			{
+				string str_i = i.ToString();
+				if(Cell("A", str_i) == "" && Cell("B", str_i) == "")
+					return i;
+			}
+
+			return nMax;
+		}
+
 		public string Header(string col)
 		{
 			string r = col + "1";
@@ -107,13 +119,29 @@ namespace zxc.excel
 		public rec_TWT ReadTWT(ref int ID, int ID_TEKST, string str_row)
 		{
 			rec_TWT twt = new rec_TWT();
+
+			int    nID_TEKST_PISMA = 0;
+			string sID_TEKST_PISMA = Cell("E", str_row);
+			if(sID_TEKST_PISMA != "")
+				nID_TEKST_PISMA = int.Parse(sID_TEKST_PISMA);
+
+			if(nID_TEKST_PISMA == 0)
+			{
+				twt.ID_TEKST_PISMA = ID++;
+				twt.rec_EXISTS = false;
+			}
+			else
+			{
+				twt.ID_TEKST_PISMA = nID_TEKST_PISMA;
+				twt.rec_EXISTS = true;
+			}
+
 			twt.ID_TEKST       = ID_TEKST;
 			twt.ID_SEKCJI      = int.Parse(Cell("G", str_row));
 			twt.kod_pisma      = Cell("H", str_row);
 			twt.ID_TYP_PISMA   = int.Parse(Cell("I", str_row));
 			twt.NR_KOLEJNY     = ParseInt(Cell("J", str_row));
-   twt.SPOS_FORMAT    = Cell("K", str_row); // dla dodanej kolumny "K"
-			twt.ID_TEKST_PISMA = ID++;
+			twt.SPOS_FORMAT    = Cell("K", str_row);            // dla dodanej kolumny "K"
 
 			Console.Write(" ={0}", twt.kod_pisma);
 			foreach(KeyValuePair<string, int> par in dParamID)
@@ -133,7 +161,10 @@ namespace zxc.excel
 		{
 			int counter = 0;
 			int twt_id = baseTWT;
-			for(int row=2; row<174; row++)
+			int max_row = RowCount(500);
+
+			System.Console.WriteLine("Liczba wierszy: {0}", max_row);
+			for(int row=2; row<max_row; row++)
 			{
 				string str_row = row.ToString();
 
@@ -142,21 +173,29 @@ namespace zxc.excel
 				//stw.STW_NAZWA     = Cell("D", str_row);
 				//stw.STW_TEKST     = Cell("F", str_row);
 
-				string key  = Cell("D", str_row);
-				string name = Cell("E", str_row);
-					int len = name.Length;
-		                len = len > 149 ? 149 : len;
-					name = name.Substring(0, len);
-				string text = Cell("F", str_row);
-				Console.Write("\n#{0}:{1}:{2}", key, row, twt_id);
+				int    nID_TEKST = 0;
+				string sID_TEKST = Cell("C", str_row);
 
-				//rec_TWT twt = ReadTWT(ref twt_id, stw.STW_ID_TEKST, str_row);
-				//rec_TWT twt = new rec_TWT();
-				//twt.ID_TEKST   = stw.STW_ID_TEKST;
-				//twt.ID_SEKCJI  = int.Parse(Cell("G", str_i));
-				//twt.kod_pisma  = Cell("H", str_i);
-				//twt.NR_KOLEJNY = ParseInt(Cell("J", str_i));
-				//twt.ID_TEKST_PISMA = twt_id++;
+				if(sID_TEKST != "") nID_TEKST = int.Parse(Cell("C", str_row));
+
+				string key;
+				
+				if(nID_TEKST == 0)
+				{ 
+					key = Cell("D", str_row);
+					//string name = Cell("E", str_row);
+					int len = key.Length;
+						len = len > 149 ? 149 : len;
+					key = key.Substring(0, len);
+				}
+				else
+				{
+					key = sID_TEKST;
+				}
+
+				string text = Cell("F", str_row);
+				int key_len = Math.Min(key.Length, 32);
+				Console.Write("\n#{0}..:{1}:{2}", key.Substring(0, key_len), row, twt_id);
 
 				if(dicts.STW.ContainsKey(key))
 				{
@@ -166,10 +205,17 @@ namespace zxc.excel
 				}
 				else
 				{
-					stw = new rec_STW();
-					stw.STW_ID_TEKST = baseSTW + counter++;
-					stw.STW_NAZWA    = Cell("D", str_row);// org name;
-					stw.STW_TEKST    = text;
+					if(nID_TEKST == 0)
+					{
+						stw = new rec_STW(baseSTW + counter++, key, text, false);
+						//stw.STW_ID_TEKST = baseSTW + counter++;
+						//stw.STW_NAZWA    = key;
+						//stw.STW_TEKST    = text;
+					}
+					else
+					{
+ 						stw = new rec_STW(nID_TEKST, key, text, true);
+					}
 					rec_TWT twt = ReadTWT(ref twt_id, stw.STW_ID_TEKST, str_row);
 					stw.TWT.Add(twt.ID_TEKST_PISMA, twt);
 					dicts.STW.Add(key, stw);
