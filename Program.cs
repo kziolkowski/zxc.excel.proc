@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using System.Configuration;
 
 
 namespace zxc.excel.proc
@@ -11,6 +12,22 @@ namespace zxc.excel.proc
 
 	class Program
 	{
+		static string mode        = "";
+
+		static string sSTW_ID;
+		static int    nSTW_ID = 0;
+
+		static string sTWT_ID;
+		static int    nTWT_ID = 0;
+
+		static string sShowPrefix = "";
+		static bool   bShowPrefix = true;
+
+		static string inputFile;
+		static string outputFile;
+
+		static string outputDir   = "";
+
 		static Dictionary<string, int> STW_dict;
 
 		static Program()
@@ -18,60 +35,101 @@ namespace zxc.excel.proc
 			STW_dict = new Dictionary<string, int>();
 		}
 
+		static void ReadConfig()
+		{
+			Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+			mode      = config.AppSettings.Settings["mode"].Value; 
+			sSTW_ID   = config.AppSettings.Settings["STW_ID"].Value;
+			nSTW_ID = int.Parse(sSTW_ID); 
+			sTWT_ID   = config.AppSettings.Settings["TWT_ID"].Value; 
+			nTWT_ID = int.Parse(sTWT_ID);
+			outputDir  = config.AppSettings.Settings["outputDir"].Value; 
+			outputFile = config.AppSettings.Settings["outputFile"].Value; 
+			inputFile = config.AppSettings.Settings["inputFile"].Value; 
+		}
+
+		static bool CheckRequiredParams(bool verbose)
+		{
+			bool res = false;
+
+			if(verbose) {
+			Console.WriteLine("input  file: {0}", inputFile);
+			Console.WriteLine("output file: {0}", outputFile);
+			Console.WriteLine("base id number for STW: {0}", nSTW_ID);
+			Console.WriteLine("base id number for TWT: {0}", nTWT_ID);
+			Console.WriteLine("SQL Generation mode: {0}", mode);
+			//Console.WriteLine("present prefix in SQL: {0}", bShowPrefix.ToString());
+			}
+
+			if(!System.IO.File.Exists(inputFile)) {
+				if(verbose) System.Console.WriteLine("Input file not exists: {0}", inputFile);
+			}
+			//if(!System.IO.Directory.Exists(outputDir)) {
+			//	if(verbose) System.Console.WriteLine("Out dir not exists: {0}", outputDir);
+			//	return false;
+			//}
+			else if(nSTW_ID <= 0) {
+				if(verbose) System.Console.WriteLine("illegal STW_ID: {0}", nSTW_ID);
+			}
+			else if(nTWT_ID <= 0) {
+				if(verbose) System.Console.WriteLine("illegal TWT_ID: {0}", nTWT_ID);
+			}
+			else if(mode !="insert" && mode!="update") {
+				if(verbose) System.Console.WriteLine("illegal mode: {0}", mode);
+			}
+			else res = true;
+
+			if(verbose && !res)
+			{
+				Console.WriteLine("Coś nie poszło ... naciś entera ...");
+				Console.ReadLine();
+			}
+
+			return res;
+		}
+
+		static void CmdProcess(string[] args)
+		{
+			if(args.Count() > 0) inputFile  = args[0];
+			if(args.Count() > 1) outputFile = args[1];
+			if(args.Count() > 2) nSTW_ID = int.Parse(args[2]);
+			if(args.Count() > 3) nTWT_ID = int.Parse(args[3]);
+			if(args.Count() > 4) mode = args[4].ToLower();
+			if(args.Count() > 5) bShowPrefix = bool.Parse(args[5]);
+
+			if(!CheckRequiredParams(false))
+				Console.WriteLine("\nUsage:\n\tzxc.excel.proc.EXE inputFilePath outputDirPath intBaseSTW intBaseTWT [insert|update] bShowPrefix [true|false]\n");
+		}
+
 		static void Main(string[] args)
 		{
-			string mode = "insert";
-			Boolean bShowPrefix = true;
+			ReadConfig();
+			CmdProcess(args);
+			if(!CheckRequiredParams(true)) return;
 
-			if(args.Count() < 4 || args.Count() > 6)
-			{
-				Console.WriteLine("\nUsage:\n\tzxc.excel.proc.EXE inputFilePath outputFilePath intBaseSTW intBaseTWT [insert|update] bShowPrefix [true|false]\n");
-				return;
-			}
+			Reader rdr   = new Reader(inputFile, "toSOS_S_TEKSTOW");
+			Dicts  dicts = new Dicts();
 
-			if(args.Count() > 4)
-			{
-				if(args[4].ToLower() == "insert")
-					mode = "insert";
-				else if(args[4].ToLower() == "update")
-					mode = "update";
-				else
-				{
-					Console.WriteLine("Incorrect mode {0}", args[4]);
-					return;
-				}
-			if(args.Count() > 5 && args[5].ToLower() == "false")
-			{
-				bShowPrefix = false;
-			}
-			}
+			int cnt = rdr.ReadSTW(dicts, nSTW_ID, nTWT_ID);
 
-			Console.WriteLine("input  file: {0}", args[0]);
-			Console.WriteLine("output file: {0}", args[1]);
-			Console.WriteLine("base number for STW: {0}", int.Parse(args[2]));
-			Console.WriteLine("base number for TWT: {0}", int.Parse(args[3]));
-			Console.WriteLine("SQL Generation mode: {0}", mode);
-			Console.WriteLine("present prefix in SQL: {0}", bShowPrefix.ToString());
+			Console.WriteLine("Counters: STW={0}/{1}, TWT={2}/{3}, PRT={4}", 
+				dicts.STW.Count(), dicts.CountNewSTW(), dicts.CountTWT(), dicts.CountNewTWT(), dicts.CountPRT());
 
-			Reader rdr = new Reader(args[0], "toSOS_S_TEKSTOW");
-			Dicts dicts = new Dicts(bShowPrefix);
+			//Console.WriteLine("{0}", dicts.ToSqlS`tring());
 
-			int cnt = rdr.ReadSTW(dicts, int.Parse(args[2]), int.Parse(args[3]));
-
-			Console.WriteLine("Counter={0}", cnt);
-
-			//Console.WriteLine("{0}", dicts.ToSqlString());
-
-			string outFile = System.IO.Path.GetFileNameWithoutExtension(args[1]);
-			string outExt  = System.IO.Path.GetExtension(args[1]);
-			string outDir  = System.IO.Path.GetDirectoryName(args[1]);
-			string outFile2 = System.IO.Path.Combine(outDir, outFile+"_pre"+outExt);
-			string delFile   = System.IO.Path.Combine(outDir, outFile+"_del"+outExt);
-			string delPreFile   = System.IO.Path.Combine(outDir, outFile+"_del_pre"+outExt);
+			string outFileName =  outputFile;
+			string outFileNE = System.IO.Path.GetFileNameWithoutExtension(outFileName);
+			string outExt  = System.IO.Path.GetExtension(outFileName);
+			if(outputDir == "")
+				outputDir  = System.IO.Path.GetDirectoryName(outFileName);
+			string outFile    = System.IO.Path.Combine(outputDir, outFileNE+outExt);
+			string outPreFile = System.IO.Path.Combine(outputDir, outFileNE+"_pre"+outExt);
+			string delFile    = System.IO.Path.Combine(outputDir, outFileNE+"_del"+outExt);
+			string delPreFile = System.IO.Path.Combine(outputDir, outFileNE+"_del_pre"+outExt);
 
 			// kodowanie polskich znakow w skrypcie : Ansi Windows-1250 
-			System.IO.StreamWriter writer_noPre   = new System.IO.StreamWriter( args[1],    false, Encoding.GetEncoding(1250) );
-			System.IO.StreamWriter writer_pre     = new System.IO.StreamWriter( outFile2,   false, Encoding.GetEncoding(1250) );
+			System.IO.StreamWriter writer_noPre   = new System.IO.StreamWriter( outFile,    false, Encoding.GetEncoding(1250) );
+			System.IO.StreamWriter writer_pre     = new System.IO.StreamWriter( outPreFile, false, Encoding.GetEncoding(1250) );
 			System.IO.StreamWriter writer_del     = new System.IO.StreamWriter( delFile,    false, Encoding.GetEncoding(1250) );
 			System.IO.StreamWriter writer_delPre  = new System.IO.StreamWriter( delPreFile, false, Encoding.GetEncoding(1250) );
 

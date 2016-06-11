@@ -394,13 +394,48 @@ namespace zxc.excel
 	class Dicts
 	{
 		public Dictionary<string, rec_STW> STW;
-		public Boolean bshowPrefix;
+		//public Boolean bshowPrefix;
 
-		public Dicts(Boolean showPrefix)
+		public Dicts()
 		{
 			STW = new Dictionary<string, rec_STW>();
-			bshowPrefix = showPrefix;
+		}
 
+		public int CountNewSTW()
+		{
+			int sum = 0;
+			foreach(var x in STW)
+				sum += x.Value.rec_EXISTS ? 0 : 1;
+
+			return sum;
+		}
+		public int CountNewTWT()
+		{
+			int sum = 0;
+			foreach(var x in STW)
+				sum += x.Value.TWT.Count(rec => !rec.Value.rec_EXISTS);
+
+			return sum;
+		}
+
+		public int CountTWT()
+		{
+			int sum = 0;
+			foreach(var x in STW)
+				sum += x.Value.TWT.Count();
+
+			return sum;
+		}
+
+
+		public int CountPRT()
+		{
+			int sum = 0;
+			foreach(var x in STW)
+				foreach(var y in x.Value.TWT)
+					sum += y.Value.PRT.Count();
+
+			return sum;
 		}
 
 		public override string ToString()
