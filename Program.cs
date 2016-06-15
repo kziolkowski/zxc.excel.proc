@@ -112,8 +112,13 @@ namespace zxc.excel.proc
 
 			int cnt = rdr.ReadSTW(dicts, nSTW_ID, nTWT_ID);
 
-			Console.WriteLine("Counters: STW={0}/{1}, TWT={2}/{3}, PRT={4}", 
-				dicts.STW.Count(), dicts.CountNewSTW(), dicts.CountTWT(), dicts.CountNewTWT(), dicts.CountPRT());
+			int nSTW   = dicts.STW.Count();
+			int nN_STW = dicts.CountNewSTW() ;
+			int nTWT   = dicts.CountTWT();
+			int nN_TWT = dicts.CountNewTWT();
+			int nPRT   = dicts.CountPRT();
+			Console.WriteLine("Counters: STW={0}/{1}, TWT={2}/{3}, PRT={4}, liczba insertów = {5} ", 
+				nSTW, nN_STW, nTWT, nN_TWT, nPRT, nN_STW+nN_TWT+nPRT );
 
 			//Console.WriteLine("{0}", dicts.ToSqlS`tring());
 
