@@ -35,26 +35,29 @@ namespace zxc.excel
 			exWks = exWbk.Sheets[sheet];
 
 			dParamID = new Dictionary<string, int>();
-            dParamID.Add("M", 1);   // ("L", 1);
-            dParamID.Add("N", 8);   // ("M", 8);
-            dParamID.Add("O", 44);  // ("N", 44);
-            dParamID.Add("P", 45);  // ("O", 45);
-            dParamID.Add("Q", 72);  // ("P", 72);
-            dParamID.Add("R", 75);  // ("Q", 75);
-            dParamID.Add("S", 242); // ("R", 242);
-            dParamID.Add("T", 245); // ("S", 245);
-            dParamID.Add("U", 289); // ("T", 289);
-            dParamID.Add("V", 324); // ("U", 324); 304 -> 324
-            dParamID.Add("W", 325); // ("V", 325); 305 -> 325
-            dParamID.Add("X", 326); // ("W", 326); 306 -> 326
-            dParamID.Add("Y", 327); // ("X", 327); 307 -> 327
-            dParamID.Add("Z", 328);  // ("Y", 328); 308 -> 328
-            dParamID.Add("AA", 329); // ("Z", 329); 309 -> 329
-            dParamID.Add("AB", 320); // ("AA", 320); 300 -> 320 zrobione wczesniej (nie wymaga zmiany)
-            dParamID.Add("AC", 321); // ("AB", 321); 301 -> 321 j.w.
-            dParamID.Add("AD", 322); // ("AC", 322); 302 -> 322 j.w.
-            dParamID.Add("AE", 323); // ("AD", 323); 303 -> 323 j.w.
-        }
+			dParamID.Add("M",    1); // ("L", 1);
+			dParamID.Add("N",    8); // ("M", 8);
+			dParamID.Add("O",   44); // ("N", 44);
+			dParamID.Add("P",   45); // ("O", 45);
+			dParamID.Add("Q",   72); // ("P", 72);
+			dParamID.Add("R",   75); // ("Q", 75);
+			dParamID.Add("S",  242); // ("R", 242);
+			dParamID.Add("T",  245); // ("S", 245);
+			dParamID.Add("U",  289); // ("T", 289);
+			dParamID.Add("V",  324); // ("U", 324); 304 -> 324
+			dParamID.Add("W",  325); // ("V", 325); 305 -> 325
+			dParamID.Add("X",  326); // ("W", 326); 306 -> 326
+			dParamID.Add("Y",  327); // ("X", 327); 307 -> 327
+			dParamID.Add("Z",  328); // ("Y", 328); 308 -> 328
+			dParamID.Add("AA", 329); // ("Z", 329); 309 -> 329
+			dParamID.Add("AB", 320); // ("AA", 320); 300 -> 320 zrobione wczesniej (nie wymaga zmiany)
+			dParamID.Add("AC", 321); // ("AB", 321); 301 -> 321 j.w.
+			dParamID.Add("AD", 322); // ("AC", 322); 302 -> 322 j.w.
+			dParamID.Add("AE", 323); // ("AD", 323); 303 -> 323 j.w.
+			dParamID.Add("AF",  46); // ("AF", 46); dodal Adam A.
+			dParamID.Add("AG",  28); // ("AD", 323);dodal Michal
+			dParamID.Add("AH",  66); // ("AF", 46); dodal Michal
+		}
 
 		~Reader()
 		{
@@ -89,8 +92,8 @@ namespace zxc.excel
 
 		public string Cell(string col, string row)
 		{
-            //return exWks.Range[ col + row ].Text;
-            return exWks.Range[col + row].Text;
+			//return exWks.Range[ col + row ].Text;
+			return exWks.Range[col + row].Text;
 		}
 
 		protected int ParseInt(string val)
@@ -101,7 +104,7 @@ namespace zxc.excel
 				return int.Parse(val);
 		}
 		
-		public rec_PRT MakePRT(int ID, string str_cell, rec_TWT twt)
+		public rec_PRT MakePRT(int ID, string str_cell, string czyReczny, rec_TWT twt)
 		{
 			rec_PRT prt = new rec_PRT();
 			prt.ID_PARAMETRU   = ID;
@@ -110,6 +113,7 @@ namespace zxc.excel
 			prt.ID_TEKST_PISMA = twt.ID_TEKST_PISMA;
 
 			prt.WARTOSC        = str_cell;
+			prt.RODZAJ         = czyReczny.ToUpper() == "R" ? "W" : "T";
 			prt.WIELE_PARAM    = str_cell[0] == ','? "T" : "N";
 
 			Console.Write("+{0}", prt.ID_PARAMETRU);
@@ -143,13 +147,15 @@ namespace zxc.excel
 			twt.NR_KOLEJNY     = ParseInt(Cell("J", str_row));
 			twt.SPOS_FORMAT    = Cell("K", str_row);            // dla dodanej kolumny "K"
 
+			string czyReczny   = Cell("L", str_row);
+
 			Console.Write(" ={0}", twt.kod_pisma);
 			foreach(KeyValuePair<string, int> par in dParamID)
 			{
 				string str_cell = Cell(par.Key, str_row);
 				if(str_cell != "")
 				{
-					rec_PRT prt = MakePRT(par.Value, str_cell, twt);
+					rec_PRT prt = MakePRT(par.Value, str_cell, czyReczny, twt);
 					twt.PRT.Add(par.Value, prt);
 				}
 			}
@@ -163,6 +169,19 @@ namespace zxc.excel
 			int twt_id = baseTWT;
 			int max_row = RowCount(500);
 
+			
+			string ver_name = string.Format("VER_{0}_{1} - wersja ", 
+				System.DateTime.Now.ToShortDateString(), 
+				System.DateTime.Now.ToShortTimeString());
+
+			string ver_desc = string.Format("user: {0}, date nad time of generation: {1} {2}",
+				Environment.UserName,
+				DateTime.Now.ToShortDateString(),
+				DateTime.Now.ToShortTimeString()); 
+
+			rec_STW ver_STW = new rec_STW(baseSTW-1, ver_name, ver_desc, false);
+			dicts.STW.Add(ver_name, ver_STW);
+		 
 			System.Console.WriteLine("Liczba wierszy: {0}", max_row);
 			for(int row=2; row<max_row; row++)
 			{

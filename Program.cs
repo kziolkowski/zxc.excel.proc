@@ -20,7 +20,7 @@ namespace zxc.excel.proc
 		static string sTWT_ID;
 		static int    nTWT_ID = 0;
 
-		static string sShowPrefix = "";
+		//static string sShowPrefix = "";
 		static bool   bShowPrefix = true;
 
 		static string inputFile;

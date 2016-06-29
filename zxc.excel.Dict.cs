@@ -128,7 +128,7 @@ namespace zxc.excel
 			prefix = "SL";
 			table  = "SOS_S_TEKST_PISMA";
 
-			PRT = new Dictionary<int, rec_PRT>();
+			PRT = new Dictionary<int, rec_PRT>(16);
 		}
 
 		public override string ToString()
@@ -226,7 +226,7 @@ namespace zxc.excel
 			prefix = "SL";
 			table  = "SOS_S_TEKSTOW";
 
-			TWT = new Dictionary<int, rec_TWT>();
+			TWT = new Dictionary<int, rec_TWT>(16);
 			rec_EXISTS = false;
 		}
 
@@ -240,7 +240,7 @@ namespace zxc.excel
 			STW_TEKST    = TEXT;
 			rec_EXISTS   = bExists;
 
-			TWT = new Dictionary<int, rec_TWT>();
+			TWT = new Dictionary<int, rec_TWT>(16);
 		}
 
 
@@ -398,7 +398,7 @@ namespace zxc.excel
 
 		public Dicts()
 		{
-			STW = new Dictionary<string, rec_STW>();
+			STW = new Dictionary<string, rec_STW>(128);
 		}
 
 		public int CountNewSTW()
