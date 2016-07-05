@@ -20,6 +20,7 @@ namespace zxc.excel
 		protected ex.Application  exApp;
 		protected ex.Workbook     exWbk; 
 		protected ex.Worksheet    exWks;
+		protected ex.Range        exRange;
 
 		protected Dictionary<string, int> dParamID;
 
@@ -30,44 +31,91 @@ namespace zxc.excel
 			else
 				throw new ArgumentException("File do not exists", aPath);
 			
-			exApp = new ex.Application();
-			exWbk = exApp.Workbooks.Open(path);
-			exWks = exWbk.Sheets[sheet];
+			exApp   = new ex.Application();
+			exWbk   = exApp.Workbooks.Open(path, 0, true);
+			exWks   = exWbk.Sheets[sheet];
+			exRange = exWks.UsedRange;
 
 			dParamID = new Dictionary<string, int>();
-			dParamID.Add("M",    1); // ("L", 1);
-			dParamID.Add("N",    8); // ("M", 8);
-			dParamID.Add("O",   44); // ("N", 44);
-			dParamID.Add("P",   45); // ("O", 45);
-			dParamID.Add("Q",   72); // ("P", 72);
-			dParamID.Add("R",   75); // ("Q", 75);
-			dParamID.Add("S",  242); // ("R", 242);
-			dParamID.Add("T",  245); // ("S", 245);
-			dParamID.Add("U",  289); // ("T", 289);
-			dParamID.Add("V",  324); // ("U", 324); 304 -> 324
-			dParamID.Add("W",  325); // ("V", 325); 305 -> 325
-			dParamID.Add("X",  326); // ("W", 326); 306 -> 326
-			dParamID.Add("Y",  327); // ("X", 327); 307 -> 327
-			dParamID.Add("Z",  328); // ("Y", 328); 308 -> 328
-			dParamID.Add("AA", 329); // ("Z", 329); 309 -> 329
-			dParamID.Add("AB", 320); // ("AA", 320); 300 -> 320 zrobione wczesniej (nie wymaga zmiany)
-			dParamID.Add("AC", 321); // ("AB", 321); 301 -> 321 j.w.
-			dParamID.Add("AD", 322); // ("AC", 322); 302 -> 322 j.w.
-			dParamID.Add("AE", 323); // ("AD", 323); 303 -> 323 j.w.
-			dParamID.Add("AF",  46); // ("AF", 46); dodal Adam A.
-			dParamID.Add("AG",  28); // ("AD", 323);dodal Michal
-			dParamID.Add("AH",  66); // ("AF", 46); dodal Michal
+			FillParamDict(ref dParamID, 'M'-'A'+1, exRange.Columns.Count);
+
+			//dParamID.Add("M",    1); // ("L", 1);
+			//dParamID.Add("N",    8); // ("M", 8);
+			//dParamID.Add("O",   44); // ("N", 44);
+			//dParamID.Add("P",   45); // ("O", 45);
+			//dParamID.Add("Q",   72); // ("P", 72);
+			//dParamID.Add("R",   75); // ("Q", 75);
+			//dParamID.Add("S",  242); // ("R", 242);
+			//dParamID.Add("T",  245); // ("S", 245);
+			//dParamID.Add("U",  289); // ("T", 289);
+			//dParamID.Add("V",  324); // ("U", 324); 304 -> 324
+			//dParamID.Add("W",  325); // ("V", 325); 305 -> 325
+			//dParamID.Add("X",  326); // ("W", 326); 306 -> 326
+			//dParamID.Add("Y",  327); // ("X", 327); 307 -> 327
+			//dParamID.Add("Z",  328); // ("Y", 328); 308 -> 328
+			//dParamID.Add("AA", 329); // ("Z", 329); 309 -> 329
+			//dParamID.Add("AB", 320); // ("AA", 320); 300 -> 320 zrobione wczesniej (nie wymaga zmiany)
+			//dParamID.Add("AC", 321); // ("AB", 321); 301 -> 321 j.w.
+			//dParamID.Add("AD", 322); // ("AC", 322); 302 -> 322 j.w.
+			//dParamID.Add("AE", 323); // ("AD", 323); 303 -> 323 j.w.
+			//dParamID.Add("AF",  46); // ("AF", 46); dodal Adam A.
+			//dParamID.Add("AG",  28); // ("AD", 323);dodal Michal
+			//dParamID.Add("AH",  66); // ("AF", 46); dodal Michal
 		}
 
 		~Reader()
 		{
 			exWbk.Close(false);
+			exApp.Quit();
 		}
 
-		public int CreateParamDict()
+		public int FillParamDict(ref Dictionary<string, int> aParDict, int nFrom, int nTo)
 		{
+			int col = 0;
+			for(col = nFrom; col < nTo; col++)
+			{
+				string sCol = ExcelColumnName(col);
+				string sCell = Cell(1, col);
+				if(sCell == string.Empty)
+					break;
 
-			return 0;
+				Console.WriteLine("[{0}]=[{1}]", sCol, sCell );
+
+				try
+				{ 
+					int nID = int.Parse(sCell);
+					aParDict.Add(sCol, nID);
+				}
+				catch(System.Exception sex)
+				{
+					Console.WriteLine(sex.Message);
+					continue;
+				}
+			}
+
+			return col;
+		}
+
+		private string ExcelColumnName(int col)
+		{
+			string columnName = String.Empty;
+			int divRes = col;
+			int modulo;
+
+			while (divRes > 0)
+			{
+				modulo = (divRes - 1) % 26;
+				columnName = Convert.ToChar(65 + modulo).ToString() + columnName;
+				divRes = (int)((divRes - modulo) / 26);
+			} 
+
+			return columnName;
+		}
+
+		public int ExcelColumnIndex(string name)
+		{
+			return name.ToUpper().
+			   Aggregate(0, (column, letter) => 26 * column + letter - 'A' + 1);
 		}
 
 		public int RowCount(int nMax)
@@ -75,7 +123,7 @@ namespace zxc.excel
 			for(int i=2; i<nMax; i++)   // 2 pierwsze wiersze pomijamy
 			{
 				string str_i = i.ToString();
-				if(Cell("A", str_i) == "" && Cell("B", str_i) == "")
+				if(Cell(i, "A") == "" && Cell(i, "B") == "")
 					return i;
 			}
 
@@ -90,11 +138,33 @@ namespace zxc.excel
 			return hdr.Text;
 		}
 
-		public string Cell(string col, string row)
+
+		public string Cell(int nRow, int nCol)
 		{
 			//return exWks.Range[ col + row ].Text;
-			return exWks.Range[col + row].Text;
+
+			return exRange.Cells[nRow, nCol].Text;
+			//return exWks.Range[col + row].Text;
 		}
+
+		public string Cell(int nRow, string col)
+		{
+			//return exWks.Range[ col + row ].Text;
+
+			return exRange.Cells[nRow, ExcelColumnIndex(col)].Text;
+			//return exWks.Range[col + row].Text;
+		}
+
+		public string Cell(string row, string col)
+		{
+			return exRange.Range[col + row].Text;
+		}
+
+		//public string Cell(ex.Range row, string col)
+		//{
+		//	return row.Cells[1, ExcelColumnIndex(col)].Text;
+		//}
+
 
 		protected int ParseInt(string val)
 		{
@@ -120,12 +190,12 @@ namespace zxc.excel
 			return prt;
 		}
 
-		public rec_TWT ReadTWT(ref int ID, int ID_TEKST, string str_row)
+		public rec_TWT ReadTWT(ref int ID, int ID_TEKST, int nRow)
 		{
 			rec_TWT twt = new rec_TWT();
 
 			int    nID_TEKST_PISMA = 0;
-			string sID_TEKST_PISMA = Cell("E", str_row);
+			string sID_TEKST_PISMA = Cell(nRow, "E"); //Cell("E", str_row);
 			if(sID_TEKST_PISMA != "")
 				nID_TEKST_PISMA = int.Parse(sID_TEKST_PISMA);
 
@@ -141,18 +211,18 @@ namespace zxc.excel
 			}
 
 			twt.ID_TEKST       = ID_TEKST;
-			twt.ID_SEKCJI      = int.Parse(Cell("G", str_row));
-			twt.kod_pisma      = Cell("H", str_row);
-			twt.ID_TYP_PISMA   = int.Parse(Cell("I", str_row));
-			twt.NR_KOLEJNY     = ParseInt(Cell("J", str_row));
-			twt.SPOS_FORMAT    = Cell("K", str_row);            // dla dodanej kolumny "K"
+			twt.ID_SEKCJI      = int.Parse( Cell(nRow, "G")); //Cell("G", str_row));
+			twt.kod_pisma      = Cell(nRow, "H"); //, str_row);
+			twt.ID_TYP_PISMA   = int.Parse(Cell(nRow, "I")); //, str_row));
+			twt.NR_KOLEJNY     = ParseInt(Cell(nRow, "J")); //, str_row));
+			twt.SPOS_FORMAT    = Cell(nRow, "K"); //, str_row);            // dla dodanej kolumny "K"
 
-			string czyReczny   = Cell("L", str_row);
+			string czyReczny   = Cell(nRow, "L"); //, str_row);
 
 			Console.Write(" ={0}", twt.kod_pisma);
 			foreach(KeyValuePair<string, int> par in dParamID)
 			{
-				string str_cell = Cell(par.Key, str_row);
+				string str_cell = Cell(nRow, par.Key); //, str_row);
 				if(str_cell != "")
 				{
 					rec_PRT prt = MakePRT(par.Value, str_cell, czyReczny, twt);
@@ -167,9 +237,13 @@ namespace zxc.excel
 		{
 			int counter = 0;
 			int twt_id = baseTWT;
-			int max_row = RowCount(500);
 
-			
+			//int max_row = RowCount(500);
+			//Console.WriteLine("max_row:{0}", max_row);
+			int nMaxRow = exRange.Rows.Count;
+			Console.WriteLine("nMaxRow:{0}", nMaxRow);
+
+
 			string ver_name = string.Format("VER_{0}_{1} - wersja ", 
 				System.DateTime.Now.ToShortDateString(), 
 				System.DateTime.Now.ToShortTimeString());
@@ -182,26 +256,28 @@ namespace zxc.excel
 			rec_STW ver_STW = new rec_STW(baseSTW-1, ver_name, ver_desc, false);
 			dicts.STW.Add(ver_name, ver_STW);
 		 
-			System.Console.WriteLine("Liczba wierszy: {0}", max_row);
-			for(int row=2; row<max_row; row++)
+//			System.Console.WriteLine("Liczba wierszy: {0}", max_row);
+//			for(int row=2; row<max_row; row++)
+			System.Console.WriteLine("Liczba wierszy: {0}", nMaxRow);
+			for(int nRow=2; nRow<=nMaxRow; nRow++)
 			{
-				string str_row = row.ToString();
+				string str_row = nRow.ToString();
+				//ex.Range exRow = exRange.Rows[row];
 
 				rec_STW stw;
-				//stw.STW_ID_TEKST  = baseSTW + row - 2;
-				//stw.STW_NAZWA     = Cell("D", str_row);
-				//stw.STW_TEKST     = Cell("F", str_row);
 
 				int    nID_TEKST = 0;
-				string sID_TEKST = Cell("C", str_row);
+				string sID_TEKST2  = Cell(str_row, "C");
+				string sID_TEKST = Cell(nRow, "C");
+				System.Diagnostics.Debug.Assert(sID_TEKST == sID_TEKST2);
 
-				if(sID_TEKST != "") nID_TEKST = int.Parse(Cell("C", str_row));
+				if(sID_TEKST != "") nID_TEKST = int.Parse(sID_TEKST);
 
 				string key;
 				
 				if(nID_TEKST == 0)
 				{ 
-					key = Cell("D", str_row);
+					key = Cell(nRow, "D");
 					//string name = Cell("E", str_row);
 					int len = key.Length;
 						len = len > 149 ? 149 : len;
@@ -212,14 +288,14 @@ namespace zxc.excel
 					key = sID_TEKST;
 				}
 
-				string text = Cell("F", str_row);
+				string text = Cell(nRow, "F");
 				int key_len = Math.Min(key.Length, 32);
-				Console.Write("\n#{0}..:{1}:{2}", key.Substring(0, key_len), row, twt_id);
+				Console.Write("\n#{0}..:{1}:{2}", key.Substring(0, key_len), nRow, twt_id);
 
 				if(dicts.STW.ContainsKey(key))
 				{
 					stw = dicts.STW[key];
-					rec_TWT twt = ReadTWT(ref twt_id, stw.STW_ID_TEKST, str_row);
+					rec_TWT twt = ReadTWT(ref twt_id, stw.STW_ID_TEKST, nRow);
 					stw.TWT.Add(twt.ID_TEKST_PISMA, twt);
 				}
 				else
@@ -235,7 +311,7 @@ namespace zxc.excel
 					{
  						stw = new rec_STW(nID_TEKST, key, text, true);
 					}
-					rec_TWT twt = ReadTWT(ref twt_id, stw.STW_ID_TEKST, str_row);
+					rec_TWT twt = ReadTWT(ref twt_id, stw.STW_ID_TEKST, nRow);
 					stw.TWT.Add(twt.ID_TEKST_PISMA, twt);
 					dicts.STW.Add(key, stw);
 				}

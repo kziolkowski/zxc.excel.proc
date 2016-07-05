@@ -50,8 +50,8 @@ namespace zxc.excel
 			ID_TEKST_PISMA = 0;	//pk
 			ID_PARAMETRU   = 0;	//pk
 			ID_SEKCJI      = 0;
-			RODZAJ         = "T"; //todo check
-			WIELE_PARAM    = "T"; //T - jak sa przecinki w wartosci
+			RODZAJ         = "T"; // T - automaTycznie, W - recznie ???
+			WIELE_PARAM    = "T"; // T - jak sa przecinki wokol ,wartosci,
 			//PARAM_FILTR = "NULL";
 			WARTOSC        = "";
 		}
