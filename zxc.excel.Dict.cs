@@ -84,6 +84,36 @@ namespace zxc.excel
 			return sb.ToString();
 		}
 
+		public string to_merge_string(Boolean presentPrefix)
+		{
+			StringBuilder sb = new StringBuilder();
+			sb.AppendFormat("\n    merge into {0} as p using ( values ", table_name(presentPrefix) );
+ 			sb.AppendFormat("\n    ({0},{1},{2},'{3}',{4},NULL,'{5}','{6}') );", 
+						ID_TYP_PISMA, ID_TEKST_PISMA, ID_PARAMETRU,
+						RODZAJ, ID_SEKCJI, WARTOSC, WIELE_PARAM );
+			sb.Append("\n    as r (PRT_ID_TYP_PISMA,PRT_ID_TEKST_PISMA,PRT_ID_PARAMETRU,");
+			sb.Append("\n    PRT_RODZAJ,PRT_ID_SEKCJI,PRT_PARAM_FILTR,PRT_WARTOSC,PRT_WIELE_PARAM)");
+			sb.Append("\n    on  p.PRT_ID_TYP_PISMA = r.PRT_ID_TYP_PISMA");
+			sb.Append("\n    and p.PRT_ID_TEKST_PISMA = r.PRT_ID_TEKST_PISMA");
+			sb.Append("\n    and p.PRT_ID_PARAMETRU = r.PRT_ID_PARAMETRU");
+			sb.Append("\n    when mached then update set ");
+			sb.Append("\n    p.PRT_ID_TYP_PISMA=r.PRT_ID_TYP_PISMA,");
+			sb.Append("\n    p.PRT_ID_TEKST_PISMA=r.PRT_ID_TEKST_PISMA,");
+			sb.Append("\n    p.PRT_ID_PARAMETRU=r.PRT_ID_PARAMETRU,");
+			sb.Append("\n    p.PRT_RODZAJ=r.PRT_RODZAJ, p.PRT_ID_SEKCJI=r.PRT_ID_SEKCJI,");
+			sb.Append("\n    p.PRT_PARAM_FILTR=r.PRT_PARAM_FILTR,");
+			sb.Append("\n    p.PRT_WARTOSC=r.PRT_WARTOSC, p.PRT_WIELE_PARAM=r.PRT_WIELE_PARAM);");
+			sb.Append("\n    when not mached then insert  ");
+			sb.Append("\n    (PRT_ID_TYP_PISMA,PRT_ID_TEKST_PISMA,PRT_ID_PARAMETRU,");
+			sb.Append("\n    PRT_RODZAJ,PRT_ID_SEKCJI,PRT_PARAM_FILTR,");
+			sb.Append("\n    PRT_WARTOSC,PRT_WIELE_PARAM)");
+			sb.Append("\n    values (r.PRT_ID_TYP_PISMA,r.PRT_ID_TEKST_PISMA,r.PRT_ID_PARAMETRU,");
+			sb.Append("\n    r.PRT_RODZAJ,r.PRT_ID_SEKCJI,r.PRT_PARAM_FILTR,");
+			sb.Append("\n    r.PRT_WARTOSC,r.PRT_WIELE_PARAM);");
+
+			return sb.ToString();
+		}
+
 		public string to_update_string(Boolean presentPrefix)
 		{
 			StringBuilder sb = new StringBuilder();
@@ -139,6 +169,7 @@ namespace zxc.excel
 		public string to_delete_string(Boolean presentPrefix)
 		{
 			StringBuilder sb = new StringBuilder();
+			
 			foreach(KeyValuePair<int, rec_PRT> prt in PRT)
 			{
 				sb.Append( prt.Value.to_delete_string(presentPrefix) );
@@ -167,7 +198,7 @@ namespace zxc.excel
 				sb.AppendFormat("\n  (TWT_ID_TEKST_PISMA,TWT_ID_TYP_PISMA,TWT_ID_TEKST,TWT_ID_SEKCJI," );
 				sb.Append(      "\n  TWT_NR_KOL_TEKSTU,TWT_CZY_DOMYSLNY,TWT_SPOS_FORMAT,");
 				sb.Append(      "\n  TWT_DATA_OD,TWT_DATA_DO)\n");
-				sb.AppendFormat("  VALUES\n  ({0},{1},{2},{3},{4},'T','{5}','2016-01-01','9999-09-09'); ", //-- {5}\n", 
+				sb.AppendFormat("  VALUES\n  ({0},{1},{2},{3},{4},'T','{5}','2016-01-01','9999-12-31'); ", //-- {5}\n", 
 					ID_TEKST_PISMA, ID_TYP_PISMA, ID_TEKST, ID_SEKCJI, NR_KOLEJNY, SPOS_FORMAT); //, kod_pisma);
 			}
 			else
@@ -182,6 +213,49 @@ namespace zxc.excel
 			
 			return sb.ToString();
 		}
+
+		public string to_merge_string(Boolean presentPrefix)
+		{
+			StringBuilder sb = new StringBuilder();
+			if(!rec_EXISTS)
+			{
+				sb.AppendFormat("\n  MERGE INTO {0} AS T USING ( VALUES", table_name(presentPrefix) );
+				sb.AppendFormat("\n  ({0},{1},{2},{3},{4},'T','{5}','2016-01-01','9999-12-31')) AS R", //-- {5}\n", 
+					ID_TEKST_PISMA, ID_TYP_PISMA, ID_TEKST, ID_SEKCJI, NR_KOLEJNY, SPOS_FORMAT); //, kod_pisma);
+				sb.Append("\n  (TWT_ID_TEKST_PISMA,TWT_ID_TYP_PISMA,TWT_ID_TEKST,TWT_ID_SEKCJI," );
+				sb.Append("\n  TWT_NR_KOL_TEKSTU,TWT_CZY_DOMYSLNY,TWT_SPOS_FORMAT,");
+				sb.Append("\n  TWT_DATA_OD,TWT_DATA_DO)");
+				sb.Append("\n  ON T.TWT_ID_TEKST_PISMA = R.TWT_ID_TEKST_PISMA");
+				sb.Append("\n  WHEN MATCHED THEN update set ");
+				sb.Append("\n  T.TWT_ID_TEKST_PISMA=R.TWT_ID_TEKST_PISMA,");
+				sb.Append("\n  T.TWT_ID_TYP_PISMA=R.TWT_ID_TYP_PISMA,");
+				sb.Append("\n  T.TWT_ID_TEKST=R.TWT_ID_TEKST,");
+				sb.Append("\n  T.TWT_ID_SEKCJI=R.TWT_ID_SEKCJI," );
+				sb.Append("\n  T.TWT_NR_KOL_TEKSTU=R.TWT_NR_KOL_TEKSTU,");
+				sb.Append("\n  T.TWT_CZY_DOMYSLNY=R.TWT_CZY_DOMYSLNY,");
+				sb.Append("\n  T.TWT_SPOS_FORMAT=R.TWT_SPOS_FORMAT,");
+				sb.Append("\n  T.TWT_DATA_OD=R.TWT_DATA_OD, T.TWT_DATA_DO=R.TWT_DATA_DO");
+				sb.Append("\n  WHEN NOT MATCHED THEN insert ");
+				sb.Append("\n  (TWT_ID_TEKST_PISMA,TWT_ID_TYP_PISMA,TWT_ID_TEKST,TWT_ID_SEKCJI," );
+				sb.Append("\n  TWT_NR_KOL_TEKSTU,TWT_CZY_DOMYSLNY,TWT_SPOS_FORMAT,");
+				sb.Append("\n  TWT_DATA_OD,TWT_DATA_DO) VALUES");
+				sb.Append("\n  (R.TWT_ID_TEKST_PISMA,R.TWT_ID_TYP_PISMA,R.TWT_ID_TEKST,R.TWT_ID_SEKCJI," );
+				sb.Append("\n  R.TWT_NR_KOL_TEKSTU,R.TWT_CZY_DOMYSLNY,R.TWT_SPOS_FORMAT,");
+				sb.Append("\n  R.TWT_DATA_OD,R.TWT_DATA_DO);");
+			}
+			else
+			{
+				sb.AppendFormat("\n  -- {0} TWT_ID_TEKST_PISMA={1}", table_name(presentPrefix), ID_TEKST_PISMA);
+			}
+
+			foreach(KeyValuePair<int, rec_PRT> prt in PRT)
+			{
+				sb.Append( prt.Value.to_merge_string(presentPrefix) );
+			}
+			
+			return sb.ToString();
+		}
+
 
 		public string to_update_string(Boolean presentPrefix)
 		{
@@ -328,6 +402,12 @@ namespace zxc.excel
 			{ 
 				sb.AppendFormat("\nDELETE FROM {0}\n", table_name(presentPrefix) );
 				sb.AppendFormat("WHERE STW_ID_TEKST={0};", STW_ID_TEKST);
+				// print version record - to allow see it
+				if(STW_ID_TEKST == zxc.excel.proc.Program.nSTW_ID-1)
+				{
+					sb.AppendFormat("\n-- STW_NAZWA:'{0}'", STW_NAZWA);
+ 					sb.AppendFormat("\n-- STW_TEKST:'{0}'", STW_TEKST);
+				}
 			}
 			else
 			{
@@ -355,11 +435,43 @@ namespace zxc.excel
 			}
 			else
 			{
-				sb.AppendFormat("\n-- {0} STW_ID_TEKST={1} {2}", table_name(presentPrefix), STW_ID_TEKST, STW_NAZWA.Substring(0, short_len));
+				sb.AppendFormat("\n-- {0} STW_ID_TEKST={1} {2}", table_name(presentPrefix), 
+					STW_ID_TEKST, STW_NAZWA.Substring(0, short_len));
 			}
 
 			foreach(KeyValuePair<int, rec_TWT> twt in TWT)
 				sb.Append( twt.Value.to_insert_string(presentPrefix) );
+			
+			return sb.ToString();
+		}
+
+		public string to_merge_string(Boolean presentPrefix)
+		{
+			int len = Math.Min(STW_NAZWA.Length, 148);
+			int short_len = Math.Min(STW_NAZWA.Length, 6);
+			StringBuilder sb = new StringBuilder();
+			if(!rec_EXISTS)
+			{ 
+				sb.AppendFormat("\nMERGE INTO {0} AS S USING ( ", table_name(presentPrefix) );
+				sb.AppendFormat("VALUES({0},\n{1},\n{2}", 
+					STW_ID_TEKST, 
+					LimitWidthConvert( STW_NAZWA.Substring(0, len), 65, concatString), 
+					LimitWidthConvert( NewLineConvert(STW_TEKST),   65, concatString)
+				);
+				sb.Append(")) AS R (ID_TEKST, NAZWA, TEKST) on R.ID_TEKST = S.STW_ID_TEKST" );
+				sb.Append("\nWHEN MATCHED THEN UPDATE ");
+				sb.Append("\nSET S.STW_NAZWA = R.NAZWA, S.STW_TEKST = R.TEKST");
+				sb.Append("\nWHEN NOT MATCHED THEN INSERT");
+				sb.Append("\n(STW_ID_TEKST,STW_NAZWA,STW_TEKST) \nVALUES (R.ID_TEKST, R.NAZWA, R.TEKST);");
+			}
+			else
+			{
+				sb.AppendFormat("\n-- {0} STW_ID_TEKST={1} {2}", table_name(presentPrefix), 
+					STW_ID_TEKST, STW_NAZWA.Substring(0, short_len));
+			}
+
+			foreach(KeyValuePair<int, rec_TWT> twt in TWT)
+				sb.Append( twt.Value.to_merge_string(presentPrefix) );
 			
 			return sb.ToString();
 		}
@@ -465,6 +577,16 @@ namespace zxc.excel
 			foreach(KeyValuePair<string, rec_STW> rec in STW)
 			{
 				sb.Append( rec.Value.to_insert_string(bPrefix) );
+			}
+			return sb.ToString();
+		}
+
+		public string to_merge_string(bool bPrefix)
+		{
+			StringBuilder sb = new StringBuilder();
+			foreach(KeyValuePair<string, rec_STW> rec in STW)
+			{
+				sb.Append( rec.Value.to_merge_string(bPrefix) );
 			}
 			return sb.ToString();
 		}

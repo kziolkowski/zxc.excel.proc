@@ -36,6 +36,8 @@ namespace zxc.excel
 			exWks   = exWbk.Sheets[sheet];
 			exRange = exWks.UsedRange;
 
+			Console.WriteLine("\nZakres danych, kolumny: {0}, wiersze {1}.\n", exRange.Columns.Count, exRange.Rows.Count);
+
 			dParamID = new Dictionary<string, int>();
 			FillParamDict(ref dParamID, 'M'-'A'+1, exRange.Columns.Count);
 

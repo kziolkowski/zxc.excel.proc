@@ -15,7 +15,7 @@ namespace zxc.excel.proc
 		static string mode        = "";
 
 		static string sSTW_ID;
-		static int    nSTW_ID = 0;
+		public static int    nSTW_ID = 0;
 
 		static string sTWT_ID;
 		static int    nTWT_ID = 0;
@@ -43,9 +43,9 @@ namespace zxc.excel.proc
 			nSTW_ID = int.Parse(sSTW_ID); 
 			sTWT_ID   = config.AppSettings.Settings["TWT_ID"].Value; 
 			nTWT_ID = int.Parse(sTWT_ID);
-			outputDir  = config.AppSettings.Settings["outputDir"].Value; 
+			outputDir  = config.AppSettings.Settings["outputDir" ].Value; 
 			outputFile = config.AppSettings.Settings["outputFile"].Value; 
-			inputFile = config.AppSettings.Settings["inputFile"].Value; 
+			inputFile  = config.AppSettings.Settings["inputFile" ].Value; 
 		}
 
 		static bool CheckRequiredParams(bool verbose)
@@ -74,7 +74,7 @@ namespace zxc.excel.proc
 			else if(nTWT_ID <= 0) {
 				if(verbose) System.Console.WriteLine("illegal TWT_ID: {0}", nTWT_ID);
 			}
-			else if(mode !="insert" && mode!="update") {
+			else if(mode !="insert" && mode!="update" && mode !="merge") {
 				if(verbose) System.Console.WriteLine("illegal mode: {0}", mode);
 			}
 			else res = true;
@@ -98,7 +98,7 @@ namespace zxc.excel.proc
 			if(args.Count() > 5) bShowPrefix = bool.Parse(args[5]);
 
 			if(!CheckRequiredParams(false))
-				Console.WriteLine("\nUsage:\n\tzxc.excel.proc.EXE inputFilePath outputDirPath intBaseSTW intBaseTWT [insert|update] bShowPrefix [true|false]\n");
+				Console.WriteLine("\nUsage:\n\tzxc.excel.proc.EXE inputFilePath outputDirPath intBaseSTW intBaseTWT [insert|update|merge] bShowPrefix [true|false]\n");
 		}
 
 		static void Main(string[] args)
@@ -151,15 +151,16 @@ namespace zxc.excel.proc
 
  				writer_delPre.Write( dicts.to_delete_string(true) );
 				writer_delPre.Close();
-
 			}
 			else if(mode == "update")
 			{
-				writer_noPre.Write( dicts.to_update_string(false) );
-				writer_noPre.Close();
-
-				writer_pre.Write(   dicts.to_update_string(true)  );
-				writer_pre.Close();
+				writer_noPre.Write( dicts.to_update_string(false) ); writer_noPre.Close();
+				writer_pre.Write(   dicts.to_update_string(true)  ); writer_pre.Close();
+			}
+			else if(mode == "merge")
+			{
+				writer_noPre.Write( dicts.to_merge_string(false) ); writer_noPre.Close();
+				writer_pre.Write(   dicts.to_merge_string(true)  ); writer_pre.Close();
 			}
 			else
 				Console.WriteLine("Nieznany sql mode.");
